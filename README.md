@@ -18,8 +18,6 @@ This Python-based compiler is built from scratch, focusing on the frontend of a 
     - [⚙️ Installation](#️-installation)
     - [🖥️ Usage](#️-usage)
   - [🔄 Current Status](#-current-status)
-  - [🤝 Contributing](#-contributing)
-  - [📜 License](#-license)
 
 ## 📁 Project Structure
 
@@ -93,36 +91,23 @@ The project structure is organized as follows, considering future implementation
    cd compyler
    ```
 
-2. Install dependencies (if any):
-   ```sh
-   pip install -r requirements.txt
-   ```
-
 ### 🖥️ Usage
 
 > ⚠️ **Note**: The project is currently in its early stages, focusing on lexical analysis.
 
-To start the REPL:
+- To start the REPL:
 ```sh
 python scripts/run_rpl.py
 ```
 
-To read and process a file:
+- To read and process a file:
 ```sh
 python scripts/run_rpl.py path/to/file.txt
 ```
 
 ## 🔄 Current Status
 
-- ✅ Lexical Analysis (Scanner/Tokenizer)
-- 🔄 Syntax Analysis (Parser) - In Progress
+- 🔄 Lexical Analysis (Scanner/Tokenizer)
+- ⏳ Syntax Analysis (Parser) - In Progress
 - ⏳ Semantic Analysis - Planned
 - ⏳ Code Generation - Planned
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to open an issue or submit a pull request.
-
-## 📜 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
