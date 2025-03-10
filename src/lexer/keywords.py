@@ -35,4 +35,5 @@ class Keywords:
             "null" : TokenType.NULL,
             # Funcionalidad: Leer entrada del teclado
             "input": TokenType.INPUT
+            
         }
