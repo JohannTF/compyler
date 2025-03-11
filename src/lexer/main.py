@@ -1,5 +1,4 @@
-# main.py
-from scan import Scanner
+from scanner import Scanner
 
 def analizar_codigo(codigo_fuente):
     """
