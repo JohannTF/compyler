@@ -1,8 +1,8 @@
-from .tokenInfo import TokenInfo
-from .token_type import TokenType
-from .error_handler import ErrorHandler
-from .keywords import Keywords
-#from src.utils import file_handler
+# scanner.py
+from token import Token
+from token_type import TokenType
+from error_handler import ErrorHandler
+from keywords import Keywords
 
 class Scanner:
     """
@@ -22,39 +22,41 @@ class Scanner:
         Escanea todo el código fuente y genera todos los tokens.
         """
         while not self.fin_archivo():
+            # Marcamos el inicio de un nuevo token
             self.inicio = self.actual
             self.escanear_token()
         
-        self.tokens.append(TokenInfo(TokenType.EOF, "", None, self.linea))
+        # Agregar token de fin de archivo
+        self.tokens.append(Token(TokenType.EOF))
         return self.tokens
-    
-    
-    def siguiente_token(self):
+            
+    def fin_archivo(self):
         """
-        Obtiene el siguiente token del código fuente.
+        Verifica si se ha llegado al final del archivo.
         """
-        if self.actual >= len(self.codigo_fuente):
-            return TokenInfo(TokenType.EOF, "", None, self.linea)
-        self.inicio = self.actual
-        return self.escanear_token()
-
+        return self.actual >= len(self.codigo_fuente)
 
     def escanear_token(self):
         """
-        Escanea un único token y lo define según su tipo
+        Escanea un único token.
         """
         c = self.avanzar()
-        
-        if c.isspace():
+
+        # Identificar el token según el carácter actual
+        if c.isspace() or c == '\n':
             self.manejar_espacios(c)
             return None
-        if c.isalpha() or c == "_":
+        
+        elif c.isalpha() or c == '_':
             return self.identificador()
-        if c.isdigit():
+        
+        elif c.isdigit():
             return self.numero()
-        if c == "":
+        
+        elif c == '"':
             return self.cadena()
-        if c == '/':
+        
+        elif c == '/':
             if self.coincidir('/'):
                 # Comentario de una línea
                 while self.caracter_actual() != '\n' and not self.fin_archivo():
@@ -65,42 +67,39 @@ class Scanner:
                 return self.comentario_multilinea()
             else:
                 return self.agregar_token(TokenType.SLASH)
-
+        
         # Operadores de un carácter
-        if c == '(': return self.agregar_token(TokenType.LEFT_PAREN)
-        if c == ')': return self.agregar_token(TokenType.RIGHT_PAREN)
-        if c == '{': return self.agregar_token(TokenType.LEFT_BRACE)
-        if c == '}': return self.agregar_token(TokenType.RIGHT_BRACE)
-        if c == ',': return self.agregar_token(TokenType.COMMA)
-        if c == '.': return self.agregar_token(TokenType.DOT)
-        if c == '-': 
+        elif c == '(': return self.agregar_token(TokenType.LEFT_PAREN)
+        elif c == ')': return self.agregar_token(TokenType.RIGHT_PAREN)
+        elif c == '{': return self.agregar_token(TokenType.LEFT_BRACE)
+        elif c == '}': return self.agregar_token(TokenType.RIGHT_BRACE)
+        elif c == ',': return self.agregar_token(TokenType.COMMA)
+        elif c == '.': return self.agregar_token(TokenType.DOT)
+        elif c == '-': 
             if self.coincidir('-'):
-                return self.agregar_token(TokenType.DECREMENT)  # Funcionalidad nueva: operador --
+                return self.agregar_token(TokenType.DECREMENT)  # Operador --
             return self.agregar_token(TokenType.MINUS)
-        if c == '+': 
+        elif c == '+': 
             if self.coincidir('+'):
-                return self.agregar_token(TokenType.INCREMENT)  # Funcionalidad nueva: operador ++
+                return self.agregar_token(TokenType.INCREMENT)  # Operador ++
             return self.agregar_token(TokenType.PLUS)
-        if c == ';': return self.agregar_token(TokenType.SEMICOLON)
-        if c == '*': return self.agregar_token(TokenType.STAR)
-
+        elif c == ';': return self.agregar_token(TokenType.SEMICOLON)
+        elif c == '*': return self.agregar_token(TokenType.STAR)
+        
         # Operadores de dos caracteres
-        if c == '!':
+        elif c == '!':
             return self.agregar_token(TokenType.BANG_EQUAL if self.coincidir('=') else TokenType.BANG)
-        if c == '=':
+        elif c == '=':
             return self.agregar_token(TokenType.EQUAL_EQUAL if self.coincidir('=') else TokenType.EQUAL)
-        if c == '<':
+        elif c == '<':
             return self.agregar_token(TokenType.LESS_EQUAL if self.coincidir('=') else TokenType.LESS)
-        if c == '>':
+        elif c == '>':
             return self.agregar_token(TokenType.GREATER_EQUAL if self.coincidir('=') else TokenType.GREATER)
-
-        # Operador ternario
-        if c == '?': return self.agregar_token(TokenType.QUESTION)
-        if c == ':': return self.agregar_token(TokenType.COLON)
         
         # Error léxico: carácter no reconocido
-        self.error_lexico(f"Carácter no reconocido: '{c}'")
-        return None
+        else:
+            self.error_lexico(f"Carácter no reconocido: '{c}'")
+            return None
 
     def avanzar(self):
         """
@@ -111,7 +110,16 @@ class Scanner:
         c = self.codigo_fuente[self.actual]
         self.actual += 1
         return c
-
+    
+    def siguiente_token(self):
+        """
+        Obtiene el siguiente token del código fuente.
+        """
+        if self.actual >= len(self.codigo_fuente):
+            return Token(TokenType.EOF)
+        
+        self.inicio = self.actual
+        return self.escanear_token()
     
     def caracter_actual(self):
         """
@@ -120,18 +128,10 @@ class Scanner:
         if self.fin_archivo():
             return '\0'
         return self.codigo_fuente[self.actual]
-        
-    
-    def fin_archivo(self):
-        """
-        Verifica si se ha llegado al final del archivo.
-        """
-        return self.actual >= len(self.codigo_fuente)
-    
     
     def coincidir(self, esperado):
         """
-        Verifica si el carácter actual coincide con el esperado (diagrama de estados)
+        Verifica si el carácter actual coincide con el esperado.
         """
         if self.fin_archivo():
             return False
@@ -145,9 +145,10 @@ class Scanner:
         """
         Maneja los espacios en blanco y saltos de línea.
         """
+        while self.caracter_actual() in [" ", "\r", "\t"]:
+            self.avanzar()
         if c == '\n':
             self.linea += 1
-
     
     def identificador(self):
         """
@@ -159,11 +160,11 @@ class Scanner:
         # Extraer el texto del identificador
         lexema = self.codigo_fuente[self.inicio:self.actual]
         
-        # Verificar si es una palabra reservada
+        # Verificar si es una palabra reservada sino, la asigna como un "IDENTIFIER"
         tipo = self.palabras_reservadas.get(lexema, TokenType.IDENTIFIER)
         
         if tipo == TokenType.IDENTIFIER:
-            return self.agregar_token(tipo, lexema, lexema)
+            return self.agregar_token(tipo, lexema)
         elif tipo == TokenType.TRUE:
             return self.agregar_token(tipo, lexema, True)
         elif tipo == TokenType.FALSE:
@@ -172,7 +173,6 @@ class Scanner:
             return self.agregar_token(tipo, lexema, None)
         else:
             return self.agregar_token(tipo)
-
     
     def numero(self):
         """
@@ -182,7 +182,7 @@ class Scanner:
         while self.caracter_actual().isdigit():
             self.avanzar()
         
-        # Verificar si hay un punto decimal seguido de al menos un dígito
+        # Estado 16 y 17: Verificar si hay un punto decimal seguido de al menos un dígito
         es_decimal = False
         if self.caracter_actual() == '.' and self.mirar_siguiente().isdigit():
             es_decimal = True
@@ -193,12 +193,12 @@ class Scanner:
             while self.caracter_actual().isdigit():
                 self.avanzar()
         
-        # Verificar si hay un exponente (E o e)
+        # Estado 18: Verificar si hay un exponente (E o e)
         if (self.caracter_actual() == 'E' or self.caracter_actual() == 'e'):
             # Consumir la E o e
             self.avanzar()
             
-            # Verificar si hay un signo (+ o -) antes de los dígitos del exponente
+            # Estado 19: Verificar si hay un signo (+ o -) antes de los dígitos del exponente
             if self.caracter_actual() in ['+', '-']:
                 self.avanzar()
             
@@ -225,8 +225,6 @@ class Scanner:
             return None
         
         return self.agregar_token(TokenType.NUMBER, lexema, literal)
-
-
     
     def cadena(self):
         """
@@ -250,13 +248,12 @@ class Scanner:
         # Extraer el contenido de la cadena (sin las comillas)
         valor = self.codigo_fuente[self.inicio + 1:self.actual - 1]
         return self.agregar_token(TokenType.STRING, self.codigo_fuente[self.inicio:self.actual], valor)
-
-
-
+    
     def comentario_multilinea(self):
         """
         Maneja comentarios de múltiples líneas /* ... */
         """
+        # Estado de búsqueda de cierre de comentario
         while not self.fin_archivo():
             c = self.avanzar()
             
@@ -268,35 +265,27 @@ class Scanner:
                 return None
         
         if self.fin_archivo():
-            self.error_lexico("Comentario de múltiples líneas sin terminar: fin de archivo inesperado")
-            return None
-
+            self.error_lexico("Comentario sin terminar: fin de archivo inesperado")
+        return None
     
     def mirar_siguiente(self):
         """
         Mira el siguiente carácter sin avanzar el puntero.
         """
         if self.actual + 1 >= len(self.codigo_fuente):
-            return "\0"
+            return '\0'
         return self.codigo_fuente[self.actual + 1]
-        
-
     
     def agregar_token(self, tipo, lexema=None, literal=None):
         """
         Agrega un token a la lista de tokens.
         """
-        if lexema is None:
-            lexema = self.codigo_fuente[self.inicio:self.actual]
-            
-        token = TokenInfo(tipo, lexema, literal, self.linea)
+        token = Token(tipo, lexema, literal, self.linea)
         self.tokens.append(token)
         return token
-
     
     def error_lexico(self, mensaje):
         """
         Maneja errores léxicos.
         """
-        self.error_handler.error_lexico(mensaje, self.linea)
-        
+        self.error_handler.error(self.linea, mensaje)

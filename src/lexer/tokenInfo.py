@@ -10,10 +10,10 @@ class TokenInfo:
     
     def __str__(self):
         if self.tipo == "EOF":
-            return f"< {self.tipo}, $, , >"
-        elif self.tipo in ["IDENTIFIER", "NUMBER", "STRING"]:
-            return f"< {self.tipo}, {self.lexema}, {self.literal}, {self.linea} >"
-        elif self.tipo in ["TRUE", "FALSE", "NULL"]:
-            return f"< {self.tipo}, {self.lexema}, {self.literal}, {self.linea} >"
+            return f"< {self.tipo}, lexema: $, , >"
+        elif self.tipo == "IDENTIFIER":
+            return f"< {self.tipo}, lexema: {self.lexema}, linea: {self.linea} >"
+        elif self.tipo in ["NUMBER", "STRING", "TRUE", "FALSE", "NULL"]:
+            return f"< {self.tipo}, lexema: {self.lexema}, literal: {self.literal}, linea: {self.linea} >"
         else:
-            return f"< {self.tipo}, , , {self.linea} >"
+            return f"< {self.tipo}, linea: {self.linea} >"
