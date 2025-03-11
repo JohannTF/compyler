@@ -1,5 +1,5 @@
 # keywords.py
-from token_type import TokenType
+from .token_type import TokenType
 
 class Keywords:
     """

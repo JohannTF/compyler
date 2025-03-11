@@ -178,7 +178,7 @@ class Scanner:
             return self.agregar_token(tipo, lexema, None)
         else:
             return self.agregar_token(tipo)
-        
+
     
     def numero(self):
         """
