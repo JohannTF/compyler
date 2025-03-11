@@ -3,66 +3,67 @@ class TokenType:
     """
     Enumeración de los tipos de token soportados por el analizador léxico.
     """
-    # Tokens de un solo carácter
-    LEFT_PAREN = "LEFT_PAREN"      # (
-    RIGHT_PAREN = "RIGHT_PAREN"    # )
-    LEFT_BRACE = "LEFT_BRACE"      # {
-    RIGHT_BRACE = "RIGHT_BRACE"    # }
-    COMMA = "COMMA"                # ,
-    DOT = "DOT"                    # .
+    # Palabras Reservadas
+    ELSE = "ELSE"
+    FALSE = "FALSE"
+    FOR = "FOR"
+    FUN = "FUN"
+    IF = "IF"
+    NULL = "NULL"
+    PRINT = "PRINT"
+    RETURN = "RETURN"
+    TRUE = "TRUE"
+    VAR = "VAR"
+    WHILE = "WHILE"
+    
+    
+    """ OPERADORES """
+    # Operadores Aritméticos
     MINUS = "MINUS"                # -
     PLUS = "PLUS"                  # +
-    SEMICOLON = "SEMICOLON"        # ;
     SLASH = "SLASH"                # /
     STAR = "STAR"                  # *
-    
-    # Tokens de uno o dos caracteres
-    BANG = "BANG"                  # !
+
+    # Operadores Relacionales
     BANG_EQUAL = "BANG_EQUAL"      # !=
-    EQUAL = "EQUAL"                # =
     EQUAL_EQUAL = "EQUAL_EQUAL"    # ==
     GREATER = "GREATER"            # >
     GREATER_EQUAL = "GREATER_EQUAL"# >=
     LESS = "LESS"                  # <
     LESS_EQUAL = "LESS_EQUAL"      # <=
+
+    # Operadores Lógicos
+    AND = "AND"
+    OR = "OR"
+
+    # Operador de Asignación
+    EQUAL = "EQUAL"                # =
     
-    # Funcionalidades adicionales
+    # Operador de negación
+    BANG = "BANG"                  # !
+    
+    # Adicionales
     INCREMENT = "INCREMENT"        # ++
     DECREMENT = "DECREMENT"        # --
-    QUESTION = "QUESTION"          # ?
-    COLON = "COLON"                # :
     
     # Literales
     IDENTIFIER = "IDENTIFIER"
-    STRING = "STRING"
     NUMBER = "NUMBER"
     
-    # Palabras clave
-    AND = "AND"
-    CLASS = "CLASS"
-    ELSE = "ELSE"
-    FALSE = "FALSE"
-    FUN = "FUN"
-    FOR = "FOR"
-    IF = "IF"
-    NULL = "NULL"
-    OR = "OR"
-    PRINT = "PRINT"
-    RETURN = "RETURN"
-    SUPER = "SUPER"
-    THIS = "THIS"
-    TRUE = "TRUE"
-    VAR = "VAR"
-    WHILE = "WHILE"
-    
-    # Funcionalidades adicionales: tipado estático
+    # Tipos de dato
     INT = "INT"
     FLOAT = "FLOAT"
     STRING = "STRING"
     BOOLEAN = "BOOLEAN"
     
-    # Funcionalidad adicional: entrada del teclado
-    INPUT = "INPUT"
-    
+    # Signos de puntuación
+    LEFT_PAREN = "LEFT_PAREN"      # (
+    RIGHT_PAREN = "RIGHT_PAREN"    # )
+    LEFT_BRACE = "LEFT_BRACE"      # {
+    RIGHT_BRACE = "RIGHT_BRACE"    # }
+    COMMA = "COMMA"                # ,
+    SEMICOLON = "SEMICOLON"        # ;
+    DOT = "DOT"                    # .
+
     # Token de fin de archivo
     EOF = "EOF"

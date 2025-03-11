@@ -1,8 +1,7 @@
-from token import Token
+from tokenInfo import TokenInfo
 from token_type import TokenType
 from error_handler import ErrorHandler
 from keywords import Keywords
-from src.utils import file_handler
 
 class Scanner:
     """
@@ -32,7 +31,8 @@ class Scanner:
         Obtiene el siguiente token del código fuente.
         """
         if self.fin_archivo():
-            return None
+            return TokenInfo(TokenType.EOF)
+        self.inicio = self.actual    
         return self.tokens[self.actual]
 
 
@@ -42,36 +42,36 @@ class Scanner:
         """
         c = self.avanzar()
         if c == "(":
-            self.agregar_token(TokenType.IZQ_PAREN)
+            self.agregar_token(TokenType.LEFT_PAREN)
         elif c == ")":
-            self.agregar_token(TokenType.DER_PAREN)
+            self.agregar_token(TokenType.RIGHT_PAREN)
         elif c == "{":
-            self.agregar_token(TokenType.IZQ_LLAVE)
+            self.agregar_token(TokenType.LEFT_BRACE)
         elif c == "}":
-            self.agregar_token(TokenType.DER_LLAVE)
+            self.agregar_token(TokenType.RIGHT_BRACE)
         elif c == ",":
-            self.agregar_token(TokenType.COMA)
+            self.agregar_token(TokenType.COMMA)
         elif c == ".":
-            self.agregar_token(TokenType.PUNTO)
+            self.agregar_token(TokenType.DOT)
         elif c == "-":
-            self.agregar_token(TokenType.MENOS)
+            self.agregar_token(TokenType.MINUS)
         elif c == "+":
-            self.agregar_token(TokenType.MAS)
+            self.agregar_token(TokenType.PLUS)
         elif c == ";":
-            self.agregar_token(TokenType.PUNTO_COMA)
+            self.agregar_token(TokenType.SEMICOLON)
         elif c == "*":
-            self.agregar_token(TokenType.MULTIPLICACION)
+            self.agregar_token(TokenType.STAR)
         elif c == "!":
-            tipo = TokenType.DIFERENTE if self.coincidir("=") else TokenType.NOT
+            tipo = TokenType.BANG if self.coincidir("=") else TokenType.BANG_EQUAL
             self.agregar_token(tipo)
         elif c == "=":
-            tipo = TokenType.IGUAL if self.coincidir("=") else TokenType.ASIGNACION
+            tipo = TokenType.EQUAL if self.coincidir("=") else TokenType.EQUAL_EQUAL
             self.agregar_token(tipo)
         elif c == "<":
-            tipo = TokenType.MENOR if self.coincidir("=") else TokenType.MENOR_IGUAL
+            tipo = TokenType.LESS if self.coincidir("=") else TokenType.LESS_EQUAL
             self.agregar_token(tipo)
         elif c == ">":
-            tipo = TokenType.MAYOR if self.coincidir("=") else TokenType.MAYOR_IGUAL
+            tipo = TokenType.GREATER if self.coincidir("=") else TokenType.GREATER_EQUAL
             self.agregar_token(tipo)
         elif c == "/":
             if self.coincidir("/"):
@@ -80,7 +80,7 @@ class Scanner:
             elif self.coincidir("*"):
                 self.comentario_multilinea()
             else:
-                self.agregar_token(TokenType.DIVISION)
+                self.agregar_token(TokenType.SLASH)
         elif c in [" ", "\r", "\t"]:
             self.manejar_espacios(c)
         elif c == "\n":
@@ -95,18 +95,18 @@ class Scanner:
             self.error_lexico(f"Carácter inesperado '{c}' en la línea {self.linea}")
 
 
+    # Por modificar (espacios)
     def avanzar(self):
         """
         Avanza al siguiente carácter y devuelve el actual.
         """
         while self.caracter_actual() in [" ", "\r", "\t"]:
+            self.actual += 1
             self.avanzar()
         if self.fin_archivo():
             return
-        self.actual += 1
         return self.codigo_fuente[self.actual - 1]
-        
-
+    
     
     def caracter_actual(self):
         """
@@ -119,9 +119,7 @@ class Scanner:
         """
         Verifica si se ha llegado al final del archivo.
         """
-        if self.actual >= len(self.codigo_fuente):
-            return True
-        return False
+        return self.actual >= len(self.codigo_fuente)
         
     
     def coincidir(self, esperado):
@@ -135,6 +133,7 @@ class Scanner:
         self.actual += 1
         return True
     
+    
     def manejar_espacios(self, c):
         """
         Maneja los espacios en blanco y saltos de línea.
@@ -145,23 +144,72 @@ class Scanner:
             self.linea += 1
         
 
-    
     def identificador(self):
         """
         Maneja los identificadores y palabras reservadas.
         """
-        
-    
+        while self.actual < len(self.codigo_fuente) and (self.caracter_actual().isalnum() or self.caracter_actual() == "_"):
+            self.avanzar()
+
+        # Obtener el texto del identificador
+        texto = self.codigo_fuente[self.inicio:self.actual]
+
+        # Verificar si es una palabra reservada
+        if texto in self.palabras_reservadas:
+            tipo = self.palabras_reservadas[texto]
+        else:
+            tipo = TokenType.IDENTIFICADOR
+
+        self.agregar_token(tipo)
+
+
     def numero(self):
         """
         Maneja los números (enteros, flotantes y de doble precisión).
         """
+        # Procesar la parte entera
+        while self.actual < len(self.codigo_fuente) and self.caracter_actual().isdigit():
+            self.avanzar()
 
-    
+        # Verificar si hay un punto decimal seguido de dígitos
+        if self.actual < len(self.codigo_fuente) and self.caracter_actual() == "." and self.mirar_siguiente().isdigit():
+            # Consumir el punto
+            self.avanzar()
+
+            # Consumir los dígitos después del punto
+            while self.actual < len(self.codigo_fuente) and self.caracter_actual().isdigit():
+                self.avanzar()
+
+            # Convertir a flotante
+            valor = float(self.codigo_fuente[self.inicio:self.actual])
+            self.agregar_token(TokenType.NUMERO, literal=valor)
+        else:
+            # Es un entero
+            valor = int(self.codigo_fuente[self.inicio:self.actual])
+            self.agregar_token(TokenType.NUMERO, literal=valor)
+
+
     def cadena(self):
         """
         Maneja las cadenas delimitadas por comillas dobles.
         """
+        # Avanzar hasta encontrar la comilla de cierre o el final del archivo
+        while self.actual < len(self.codigo_fuente) and self.caracter_actual() != "\"" and not self.fin_archivo():
+            if self.caracter_actual() == "\n":
+                self.linea += 1
+            self.avanzar()
+
+        # Si se llegó al final del archivo sin encontrar la comilla de cierre
+        if self.fin_archivo() or self.caracter_actual() != "\"":
+            self.error_lexico("Cadena sin terminar")
+            return
+
+        # Consumir la comilla de cierre
+        self.avanzar()
+
+        # Obtener el valor de la cadena (sin las comillas)
+        valor = self.codigo_fuente[self.inicio + 1:self.actual - 1]
+        self.agregar_token(TokenType.CADENA, literal=valor)
 
 
     def comentario_multilinea(self):
@@ -184,15 +232,14 @@ class Scanner:
             return "\0"
         return self.codigo_fuente[self.actual + 1]
         
-
-    
+        
     def agregar_token(self, tipo, lexema=None, literal=None):
         """
         Agrega un token a la lista de tokens.
         """
         lexema = lexema if lexema is not None else self.codigo_fuente[self.inicio:self.actual]
-        self.tokens.append(Token(tipo, lexema, literal, self.linea))
-        return f"{tipo} {lexema} {literal} {self.linea}"
+        self.tokens.append(TokenInfo(tipo, lexema, literal, self.linea))
+        # return f"{tipo} {lexema} {literal} {self.linea}"
 
     
     def error_lexico(self, mensaje):
@@ -202,4 +249,3 @@ class Scanner:
         self.error_handler.error_lexico(mensaje, self.linea)
         self.tokens.clear()
         return f"Error léxico: {mensaje} en la línea {self.linea}"
-        

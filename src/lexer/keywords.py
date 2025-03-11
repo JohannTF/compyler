@@ -12,7 +12,6 @@ class Keywords:
         """
         return {
             "and": TokenType.AND,
-            "class": TokenType.CLASS,
             "else": TokenType.ELSE,
             "false": TokenType.FALSE,
             "for": TokenType.FOR,
@@ -22,8 +21,6 @@ class Keywords:
             "or": TokenType.OR,
             "print": TokenType.PRINT,
             "return": TokenType.RETURN,
-            "super": TokenType.SUPER,
-            "this": TokenType.THIS,
             "true": TokenType.TRUE,
             "var": TokenType.VAR,
             "while": TokenType.WHILE,
@@ -33,7 +30,4 @@ class Keywords:
             "string": TokenType.STRING,
             "boolean": TokenType.BOOLEAN,
             "null" : TokenType.NULL,
-            # Funcionalidad: Leer entrada del teclado
-            "input": TokenType.INPUT
-            
         }
