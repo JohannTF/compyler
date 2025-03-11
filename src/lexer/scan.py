@@ -69,19 +69,19 @@ class Scanner:
                 return self.agregar_token(TokenType.SLASH)
         
         # Operadores de un carácter
-        elif c == '(': return self.agregar_token(TokenType.LEFT_PAREN, c)
-        elif c == ')': return self.agregar_token(TokenType.RIGHT_PAREN, c)
-        elif c == '{': return self.agregar_token(TokenType.LEFT_BRACE, c)
-        elif c == '}': return self.agregar_token(TokenType.RIGHT_BRACE, c)
-        elif c == ',': return self.agregar_token(TokenType.COMMA, c)
-        elif c == '.': return self.agregar_token(TokenType.DOT, c)
+        elif c == '(': return self.agregar_token(TokenType.LEFT_PAREN)
+        elif c == ')': return self.agregar_token(TokenType.RIGHT_PAREN)
+        elif c == '{': return self.agregar_token(TokenType.LEFT_BRACE)
+        elif c == '}': return self.agregar_token(TokenType.RIGHT_BRACE)
+        elif c == ',': return self.agregar_token(TokenType.COMMA)
+        elif c == '.': return self.agregar_token(TokenType.DOT)
         elif c == '-': 
             if self.coincidir('-'):
-                return self.agregar_token(TokenType.DECREMENT)  # Funcionalidad nueva: operador --
+                return self.agregar_token(TokenType.DECREMENT)  # Operador --
             return self.agregar_token(TokenType.MINUS)
         elif c == '+': 
             if self.coincidir('+'):
-                return self.agregar_token(TokenType.INCREMENT)  # Funcionalidad nueva: operador ++
+                return self.agregar_token(TokenType.INCREMENT)  # Operador ++
             return self.agregar_token(TokenType.PLUS)
         elif c == ';': return self.agregar_token(TokenType.SEMICOLON)
         elif c == '*': return self.agregar_token(TokenType.STAR)
@@ -164,7 +164,7 @@ class Scanner:
         tipo = self.palabras_reservadas.get(lexema, TokenType.IDENTIFIER)
         
         if tipo == TokenType.IDENTIFIER:
-            return self.agregar_token(tipo, lexema, lexema)
+            return self.agregar_token(tipo, lexema)
         elif tipo == TokenType.TRUE:
             return self.agregar_token(tipo, lexema, True)
         elif tipo == TokenType.FALSE:
@@ -172,7 +172,7 @@ class Scanner:
         elif tipo == TokenType.NULL:
             return self.agregar_token(tipo, lexema, None)
         else:
-            return self.agregar_token(tipo, lexema)
+            return self.agregar_token(tipo)
     
     def numero(self):
         """

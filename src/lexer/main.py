@@ -42,36 +42,12 @@ def ejemplo_siguiente_token(codigo_fuente):
 if __name__ == "__main__":
     # Ejemplo de uso con código embebido
     codigo_ejemplo = """
-    // Este es un ejemplo de código para probar el scanner
-    /* Este es un comentario
-       de múltiples líneas
-     */
-    var x = 10;
-    float y = 3.14;
-    string nombre = "Hola mundo";
-    
-    if (x > 5) {
-        print "x es mayor que 5";
-    } else {
-        print "x es menor o igual que 5";
-    }
-    
-    // Probar operadores incremento/decremento
-    x++;
-    y--;
-    
-    // Probar operador ternario
-    var resultado = (x > 10) ? "mayor" : "menor o igual";
-    
-    // Probar la función input (nueva funcionalidad)
-    string entrada = input("Ingrese su nombre: ");
-    
-    // Probar valores booleanos y null
-    boolean flag = true;
-    var nada = null;
-    
-    // Probar número con exponente
-    var cientifico = 1.5E2;
+    // Prueba operadores logicos:
+    5 and 5
+    5 and5
+    edad and(mes or anio)
+    5 or 5
+    5 or5
     """
     
     # Demostración del método escanear_tokens()
