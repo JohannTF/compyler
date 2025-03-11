@@ -25,15 +25,19 @@ class Scanner:
             self.inicio = self.actual
             self.escanear_token()
         
-        # Agregar token de fin de archivo
         self.tokens.append(Token(TokenType.EOF))
         return self.tokens
-            
-    def fin_archivo(self):
+
+
+    def siguiente_token(self):
         """
-        Verifica si se ha llegado al final del archivo.
+        Obtiene el siguiente token del código fuente.
         """
-        return self.actual >= len(self.codigo_fuente)
+        if self.actual >= len(self.codigo_fuente):
+            return Token(TokenType.EOF)
+        self.inicio = self.actual
+        return self.escanear_token()
+    
 
     def escanear_token(self):
         """
@@ -100,6 +104,7 @@ class Scanner:
             self.error_lexico(f"Carácter no reconocido: '{c}'")
             return None
 
+
     def avanzar(self):
         """
         Avanza al siguiente carácter y devuelve el actual.
@@ -110,15 +115,6 @@ class Scanner:
         self.actual += 1
         return c
     
-    def siguiente_token(self):
-        """
-        Obtiene el siguiente token del código fuente.
-        """
-        if self.actual >= len(self.codigo_fuente):
-            return Token(TokenType.EOF)
-        
-        self.inicio = self.actual
-        return self.escanear_token()
     
     def caracter_actual(self):
         """
@@ -127,6 +123,14 @@ class Scanner:
         if self.fin_archivo():
             return '\0'
         return self.codigo_fuente[self.actual]
+    
+    
+    def fin_archivo(self):
+        """
+        Verifica si se ha llegado al final del archivo.
+        """
+        return self.actual >= len(self.codigo_fuente)
+    
     
     def coincidir(self, esperado):
         """
@@ -140,6 +144,7 @@ class Scanner:
         self.actual += 1
         return True
     
+    
     def manejar_espacios(self, c):
         """
         Maneja los espacios en blanco y saltos de línea.
@@ -148,6 +153,7 @@ class Scanner:
             self.avanzar()
         if c == '\n':
             self.linea += 1
+
     
     def identificador(self):
         """
@@ -172,6 +178,7 @@ class Scanner:
             return self.agregar_token(tipo, lexema, None)
         else:
             return self.agregar_token(tipo)
+        
     
     def numero(self):
         """
@@ -225,6 +232,7 @@ class Scanner:
         
         return self.agregar_token(TokenType.NUMBER, lexema, literal)
     
+    
     def cadena(self):
         """
         Maneja las cadenas delimitadas por comillas dobles.
@@ -248,6 +256,7 @@ class Scanner:
         valor = self.codigo_fuente[self.inicio + 1:self.actual - 1]
         return self.agregar_token(TokenType.STRING, self.codigo_fuente[self.inicio:self.actual], valor)
     
+    
     def comentario_multilinea(self):
         """
         Maneja comentarios de múltiples líneas /* ... */
@@ -267,6 +276,7 @@ class Scanner:
             self.error_lexico("Comentario sin terminar: fin de archivo inesperado")
         return None
     
+    
     def mirar_siguiente(self):
         """
         Mira el siguiente carácter sin avanzar el puntero.
@@ -275,6 +285,7 @@ class Scanner:
             return '\0'
         return self.codigo_fuente[self.actual + 1]
     
+    
     def agregar_token(self, tipo, lexema=None, literal=None):
         """
         Agrega un token a la lista de tokens.
@@ -282,6 +293,7 @@ class Scanner:
         token = Token(tipo, lexema, literal, self.linea)
         self.tokens.append(token)
         return token
+    
     
     def error_lexico(self, mensaje):
         """
