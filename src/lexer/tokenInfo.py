@@ -1,4 +1,4 @@
-class Token:
+class TokenInfo:
     """
     Clase que representa un token identificado por el analizador léxico.
     """

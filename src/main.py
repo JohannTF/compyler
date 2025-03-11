@@ -1,6 +1,6 @@
-from src.utils.file_handler import read_file
-from src.lexer.scanner import Scanner
-from token_type import TokenType
+from utils.file_handler import read_file
+from lexer.scanner import Scanner
+from lexer.token_type import TokenType
 
 def main():
     # Ruta al archivo de código fuente a analizar

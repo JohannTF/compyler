@@ -6,7 +6,7 @@ class ErrorHandler:
         self.errores = []
         self.had_error = False
     
-    def error(self, linea, mensaje):
+    def error_lexico(self, mensaje, linea):
         """
         Registra un error léxico en una línea específica.
         """
