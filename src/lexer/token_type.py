@@ -48,7 +48,6 @@ class TokenType:
     
     # Literales
     IDENTIFIER = "IDENTIFIER"
-    NUMBER = "NUMBER"
     
     # Tipos de dato
     INT = "INT"

@@ -1,7 +1,7 @@
-from token import Token
-from token_type import TokenType
-from error_handler import ErrorHandler
-from keywords import Keywords
+from .token import Token
+from .token_type import TokenType
+from .error_handler import ErrorHandler
+from .keywords import Keywords
 
 class Scanner:
     """
@@ -16,6 +16,7 @@ class Scanner:
         self.palabras_reservadas = Keywords.get_keywords()
         self.error_handler = ErrorHandler()
 
+
     def escanear_tokens(self):
         """
         Escanea todo el código fuente y genera todos los tokens.
@@ -23,23 +24,13 @@ class Scanner:
         while not self.fin_archivo():
             # Marcamos el inicio de un nuevo token
             self.inicio = self.actual
-            self.escanear_token()
+            self.scan()
         
         self.tokens.append(Token(TokenType.EOF))
         return self.tokens
-
-
-    def siguiente_token(self):
-        """
-        Obtiene el siguiente token del código fuente.
-        """
-        if self.actual >= len(self.codigo_fuente):
-            return Token(TokenType.EOF)
-        self.inicio = self.actual
-        return self.escanear_token()
     
 
-    def escanear_token(self):
+    def scan(self):
         """
         Escanea un único token.
         """
@@ -191,6 +182,8 @@ class Scanner:
         # Estado 16 y 17: Verificar si hay un punto decimal seguido de al menos un dígito
         es_decimal = False
         if self.caracter_actual() == '.' and self.mirar_siguiente().isdigit():
+            if(self.linea == 5):
+                print(f'El caracter actual es: {self.caracter_actual()}')
             es_decimal = True
             # Consumir el punto
             self.avanzar()
@@ -224,13 +217,14 @@ class Scanner:
         try:
             if es_decimal or 'e' in lexema.lower():
                 literal = float(lexema)
+                return self.agregar_token(TokenType.FLOAT, lexema, literal)
             else:
                 literal = int(lexema)
+                return self.agregar_token(TokenType.INT, lexema, literal)
+                
         except ValueError:
             self.error_lexico(f"No se pudo convertir '{lexema}' a un número válido")
-            return None
-        
-        return self.agregar_token(TokenType.NUMBER, lexema, literal)
+            return None    
     
     
     def cadena(self):
@@ -242,6 +236,7 @@ class Scanner:
             if self.caracter_actual() == '\n':
                 self.error_lexico("Cadena sin terminar: se encontró un salto de línea")
                 self.linea += 1
+                self.avanzar()
                 return None
             self.avanzar()
         
@@ -299,4 +294,4 @@ class Scanner:
         """
         Maneja errores léxicos.
         """
-        self.error_handler.error(self.linea, mensaje)
+        self.error_handler.error_lexico(mensaje, self.linea)
