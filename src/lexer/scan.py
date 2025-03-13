@@ -74,7 +74,6 @@ class Scanner:
         elif c == '{': return self.agregar_token(TokenType.LEFT_BRACE)
         elif c == '}': return self.agregar_token(TokenType.RIGHT_BRACE)
         elif c == ',': return self.agregar_token(TokenType.COMMA)
-        elif c == '.': return self.agregar_token(TokenType.DOT)
         elif c == '-': 
             if self.coincidir('-'):
                 return self.agregar_token(TokenType.DECREMENT)  # Operador --

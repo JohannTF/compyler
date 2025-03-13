@@ -23,11 +23,6 @@ class Keywords:
             "return": TokenType.RETURN,
             "true": TokenType.TRUE,
             "var": TokenType.VAR,
-            "while": TokenType.WHILE,
-            # Funcionalidad: Tipado estático
-            "int": TokenType.INT,
-            "float": TokenType.FLOAT,
-            "string": TokenType.STRING,
+            "while": TokenType.WHILE, 
             "boolean": TokenType.BOOLEAN,
-            "null" : TokenType.NULL,
         }

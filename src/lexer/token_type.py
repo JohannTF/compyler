@@ -63,7 +63,6 @@ class TokenType:
     RIGHT_BRACE = "RIGHT_BRACE"    # }
     COMMA = "COMMA"                # ,
     SEMICOLON = "SEMICOLON"        # ;
-    DOT = "DOT"                    # .
 
     # Token de fin de archivo
     EOF = "EOF"
