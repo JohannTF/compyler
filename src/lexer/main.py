@@ -1,4 +1,4 @@
-from scanner import Scanner
+from lexer.scan import Scanner
 
 def analizar_codigo(codigo_fuente):
     """
