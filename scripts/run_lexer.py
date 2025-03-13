@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.utils.file_handler import read_file
-from lexer.scan import Scanner
+from src.lexer.scanner import Scanner
 
 def main():
     # Ruta al archivo de código fuente a analizar
