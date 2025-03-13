@@ -13,7 +13,7 @@ class TokenInfo:
             return f"< {self.tipo}, lexema: $, , >"
         elif self.tipo == "IDENTIFIER":
             return f"< {self.tipo}, lexema: {self.lexema}, linea: {self.linea} >"
-        elif self.tipo in ["NUMBER", "STRING", "TRUE", "FALSE", "NULL"]:
+        elif self.tipo in ["INT", "FLOAT", "STRING", "TRUE", "FALSE", "NULL"]:
             return f"< {self.tipo}, lexema: {self.lexema}, literal: {self.literal}, linea: {self.linea} >"
         else:
             return f"< {self.tipo}, linea: {self.linea} >"

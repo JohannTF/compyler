@@ -1,8 +1,8 @@
 # scanner.py
-from token import Token
-from token_type import TokenType
-from error_handler import ErrorHandler
-from keywords import Keywords
+from .tokenInfo import TokenInfo
+from .token_type import TokenType
+from .error_handler import ErrorHandler
+from .keywords import Keywords
 
 class Scanner:
     """
@@ -27,7 +27,7 @@ class Scanner:
             self.escanear_token()
         
         # Agregar token de fin de archivo
-        self.tokens.append(Token(TokenType.EOF))
+        self.tokens.append(TokenInfo(TokenType.EOF))
         return self.tokens
             
     def fin_archivo(self):
@@ -116,7 +116,7 @@ class Scanner:
         Obtiene el siguiente token del código fuente.
         """
         if self.actual >= len(self.codigo_fuente):
-            return Token(TokenType.EOF)
+            return TokenInfo(TokenType.EOF)
         
         self.inicio = self.actual
         return self.escanear_token()
@@ -192,6 +192,10 @@ class Scanner:
             # Estado 16: dígitos después del punto
             while self.caracter_actual().isdigit():
                 self.avanzar()
+        else :
+            if self.caracter_actual() == '.':
+                self.error_lexico("Se esperaba al menos un dígito después del punto")
+                return None
         
         # Estado 18: Verificar si hay un exponente (E o e)
         if (self.caracter_actual() == 'E' or self.caracter_actual() == 'e'):
@@ -218,13 +222,15 @@ class Scanner:
         try:
             if es_decimal or 'e' in lexema.lower():
                 literal = float(lexema)
+                return self.agregar_token(TokenType.FLOAT, lexema, literal)
             else:
                 literal = int(lexema)
+                return self.agregar_token(TokenType.INT, lexema, literal)
         except ValueError:
             self.error_lexico(f"No se pudo convertir '{lexema}' a un número válido")
             return None
         
-        return self.agregar_token(TokenType.NUMBER, lexema, literal)
+        
     
     def cadena(self):
         """
@@ -234,7 +240,7 @@ class Scanner:
         while self.caracter_actual() != '"' and not self.fin_archivo():
             if self.caracter_actual() == '\n':
                 self.error_lexico("Cadena sin terminar: se encontró un salto de línea")
-                self.linea += 1
+                #self.linea += 1
                 return None
             self.avanzar()
         
@@ -280,7 +286,7 @@ class Scanner:
         """
         Agrega un token a la lista de tokens.
         """
-        token = Token(tipo, lexema, literal, self.linea)
+        token = TokenInfo(tipo, lexema, literal, self.linea)
         self.tokens.append(token)
         return token
     
@@ -288,4 +294,4 @@ class Scanner:
         """
         Maneja errores léxicos.
         """
-        self.error_handler.error(self.linea, mensaje)
+        self.error_handler.error_lexico(mensaje, self.linea)

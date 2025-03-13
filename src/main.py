@@ -1,24 +1,28 @@
+import sys
+from lexer.scan import Scanner
+from interpreter.repl import start_repl
 from utils.file_handler import read_file
-from lexer.scanner import Scanner
-from lexer.token_type import TokenType
+
+def procesar_archivo(archivo_fuente):
+    try:
+        codigo_fuente = read_file(archivo_fuente)
+        scanner = Scanner(codigo_fuente)
+        scanner.escanear_tokens()
+        tokens = scanner.tokens
+        for token in tokens:
+            print(token)
+    except Exception as e:
+        print(f"Error al procesar el archivo: {e}")
 
 def main():
-    # Ruta al archivo de código fuente a analizar
-    archivo_fuente = "test_files/codigo_fuente_ejemplo.txt"
-    
-    # Leer el contenido del archivo
-    codigo_fuente = read_file(archivo_fuente)
-    
-    # Crear una instancia del escáner léxico
-    scanner = Scanner(codigo_fuente)
-    
-    # Escanear los tokens
-    scanner.escanear_tokens()
-    
-    # Obtener y mostrar los tokens generados
-    tokens = scanner.tokens
-    for token in tokens:
-        print(token)
+    if len(sys.argv) == 1:
+        start_repl()
+    elif len(sys.argv) == 2:
+        archivo_fuente = sys.argv[1]
+        procesar_archivo(archivo_fuente)
+    else:
+        print("Uso incorrecto. Proporcione un archivo o ejecute sin argumentos para el modo REPL.")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
