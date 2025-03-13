@@ -111,16 +111,6 @@ class Scanner:
         self.actual += 1
         return c
     
-    def siguiente_token(self):
-        """
-        Obtiene el siguiente token del código fuente.
-        """
-        if self.actual >= len(self.codigo_fuente):
-            return TokenInfo(TokenType.EOF)
-        
-        self.inicio = self.actual
-        return self.escanear_token()
-    
     def caracter_actual(self):
         """
         Devuelve el carácter actual sin avanzar.
