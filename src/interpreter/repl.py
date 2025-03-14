@@ -2,6 +2,12 @@
 Módulo que implementa el REPL (Read-Eval-Print Loop) para interacción interactiva.
 """
 import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.lexer.scanner import Scanner
+
 
 def start_repl(version="0.1.0"):
     """
@@ -24,7 +30,11 @@ def start_repl(version="0.1.0"):
             
             # Aquí procesamos el código ingresado
             # Por ahora solo haremos análisis léxico
-            print(code)
+            scanner = Scanner(code)
+            scanner.escanear_tokens()
+            tokens = scanner.tokens
+            for token in tokens:
+                print(token)
             
         except EOFError:
             # Lanza la excepción con Ctrl + D (Unix o macOs) 
