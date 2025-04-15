@@ -10,8 +10,9 @@ def procesar_archivo(archivo_fuente):
         scanner = Scanner(codigo_fuente)
         scanner.escanear_tokens()
         tokens = scanner.tokens
-        for token in tokens:
-            print(token)
+        # for token in tokens:
+        #     print(token)
+        return tokens
     except Exception as e:
         print(f"Error al procesar el archivo: {e}")
 
