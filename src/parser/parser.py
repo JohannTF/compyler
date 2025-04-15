@@ -201,8 +201,189 @@ class Parser:
         self.coincidir("LEFT_BRACE")
         self.declaration()
         self.coincidir("RIGHT_BRACE")
-
-
+    
+    def expression(self):
+        # EXPRESSION -> ASSIGNMENT
+        self.assignment()
+    
+    def assignment(self):
+        # ASSIGNMENT -> LOGIC_OR ASSIGNMENT_OPC
+        self.logic_or()
+        self.assignment_opc()
+    
+    def assignment_opc(self):
+        # ASSIGNMENT_OPC -> = EXPRESSION
+        #                -> Ɛ
+        if self.preanalisis.tipo == "EQUAL":
+            self.coincidir("EQUAL")
+            self.expression()
+        # Si no es =, es épsilon
+    
+    def logic_or(self):
+        # LOGIC_OR -> LOGIC_AND LOGIC_OR'
+        self.logic_and()
+        self.logic_or_prime()
+    
+    def logic_or_prime(self):
+        # LOGIC_OR' -> or LOGIC_OR
+        #          -> Ɛ
+        if self.preanalisis.tipo == "OR":
+            self.coincidir("OR")
+            self.logic_or()
+        # Si no es or, es épsilon
+    
+    def logic_and(self):
+        # LOGIC_AND -> EQUALITY LOGIC_AND'
+        self.equality()
+        self.logic_and_prime()
+    
+    def logic_and_prime(self):
+        # LOGIC_AND' -> and LOGIC_AND
+        #           -> Ɛ
+        if self.preanalisis.tipo == "AND":
+            self.coincidir("AND")
+            self.logic_and()
+        # Si no es and, es épsilon
+    
+    def equality(self):
+        # EQUALITY -> COMPARISON EQUALITY'
+        self.comparison()
+        self.equality_prime()
+    
+    def equality_prime(self):
+        # EQUALITY' -> != EQUALITY
+        #          -> == EQUALITY
+        #          -> Ɛ
+        tipo = self.preanalisis.tipo
+        
+        if tipo == "BANG_EQUAL":
+            self.coincidir("BANG_EQUAL")
+            self.equality()
+        elif tipo == "EQUAL_EQUAL":
+            self.coincidir("EQUAL_EQUAL")
+            self.equality()
+        # Si no es != o ==, es épsilon
+    
+    def comparison(self):
+        # COMPARISON -> TERM COMPARISON'
+        self.term()
+        self.comparison_prime()
+    
+    def comparison_prime(self):
+        # COMPARISON' -> > COMPARISON
+        #            -> >= COMPARISON
+        #            -> < COMPARISON
+        #            -> <= COMPARISON
+        #            -> Ɛ
+        tipo = self.preanalisis.tipo
+        
+        if tipo == "GREATER":
+            self.coincidir("GREATER")
+            self.comparison()
+        elif tipo == "GREATER_EQUAL":
+            self.coincidir("GREATER_EQUAL")
+            self.comparison()
+        elif tipo == "LESS":
+            self.coincidir("LESS")
+            self.comparison()
+        elif tipo == "LESS_EQUAL":
+            self.coincidir("LESS_EQUAL")
+            self.comparison()
+        # Si no es >, >=, < o <=, es épsilon
+    
+    def term(self):
+        # TERM -> FACTOR TERM'
+        self.factor()
+        self.term_prime()
+    
+    def term_prime(self):
+        # TERM' -> - TERM
+        #      -> + TERM
+        #      -> Ɛ
+        tipo = self.preanalisis.tipo
+        
+        if tipo == "MINUS":
+            self.coincidir("MINUS")
+            self.term()
+        elif tipo == "PLUS":
+            self.coincidir("PLUS")
+            self.term()
+        # Si no es - o +, es épsilon
+    
+    def factor(self):
+        # FACTOR -> UNARY FACTOR'
+        self.unary()
+        self.factor_prime()
+    
+    def factor_prime(self):
+        # FACTOR' -> / FACTOR
+        #        -> * FACTOR
+        #        -> Ɛ
+        tipo = self.preanalisis.tipo
+        
+        if tipo == "SLASH":
+            self.coincidir("SLASH")
+            self.factor()
+        elif tipo == "STAR":
+            self.coincidir("STAR")
+            self.factor()
+        # Si no es / o *, es épsilon
+    
+    def unary(self):
+        # UNARY -> ! UNARY
+        #       -> - UNARY
+        #       -> CALL
+        tipo = self.preanalisis.tipo
+        
+        if tipo == "BANG":
+            self.coincidir("BANG")
+            self.unary()
+        elif tipo == "MINUS":
+            self.coincidir("MINUS")
+            self.unary()
+        else:
+            self.call()
+    
+    def call(self):
+        # CALL -> PRIMARY CALL'
+        if self.preanalisis.tipo == "IDENTIFIER":
+            self.coincidir("IDENTIFIER")
+            if self.preanalisis.tipo == "LEFT_PAREN":
+                self.call_prime()
+        else: 
+            self.primary()
+    
+    def call_prime(self):
+        # CALL' -> ( ARGUMENTS )
+        #      -> Ɛ
+        if self.preanalisis.tipo == "LEFT_PAREN":
+            self.coincidir("LEFT_PAREN")
+            self.arguments()
+            self.coincidir("RIGHT_PAREN")
+        # Si no es (, es épsilon
+    
+    def primary(self):
+        # PRIMARY -> true | false | null | number | string | id | ( EXPRESSION )
+        tipo = self.preanalisis.tipo
+        
+        if tipo == "TRUE":
+            self.coincidir("TRUE")
+        elif tipo == "FALSE":
+            self.coincidir("FALSE")
+        elif tipo == "NULL":
+            self.coincidir("NULL")
+        elif tipo in ["INT", "FLOAT"]:
+            self.coincidir(tipo)
+        elif tipo == "STRING":
+            self.coincidir("STRING")
+        elif tipo == "IDENTIFIER":
+            self.coincidir("IDENTIFIER")
+        elif tipo == "LEFT_PAREN":
+            self.coincidir("LEFT_PAREN")
+            self.expression()
+            self.coincidir("RIGHT_PAREN")
+        else:
+            self.error(["TRUE", "FALSE", "NULL", "INT", "FLOAT", "STRING", "IDENTIFIER", "LEFT_PAREN"])
     
     def parameters(self):
         # PARAMETERS -> id PARAMETERS'
