@@ -29,20 +29,17 @@ def start_repl(version="0.1.0"):
                 print("Goodbye!")
                 break
             
-            # Aquí procesamos el código ingresado
-            # Por ahora solo haremos análisis léxico
+            # Procesamos el código con el analizador léxico
             scanner = Scanner(code)
             scanner.escanear_tokens()
             tokens = scanner.tokens
-            for token in tokens:
-                print(token)
                 
             # Verificar que se hayan leído tokens
             if not tokens:
                 print("No se encontraron tokens para analizar")
                 return
                     
-            # Crear el parser y analizar los tokens
+            # Crear el parser y analizar la lista de tokens
             try:
                 parser = Parser(tokens)
                 parser.parse()
@@ -50,11 +47,9 @@ def start_repl(version="0.1.0"):
                 print(f"Error inesperado: {e}")
             
         except EOFError:
-            # Lanza la excepción con Ctrl + D (Unix o macOs) 
             print()
             break
         except KeyboardInterrupt:
-            # Manejo de Ctrl+C
             print("\nOperación cancelada")
         except Exception as e:
             print(f"Error: {e}")

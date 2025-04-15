@@ -55,7 +55,7 @@ class Parser:
             self.declaration()
         elif tipo in ["IF", "FOR", "PRINT", "RETURN", "WHILE", "LEFT_BRACE", 
                      "IDENTIFIER", "STRING", "INT", "FLOAT", "TRUE", "FALSE", "NULL",
-                     "LEFT_PAREN", "MINUS", "BANG"]:
+                     "LEFT_PAREN", "MINUS", "BANG", "INCREMENT", "DECREMENT"]:
             self.statement()
             self.declaration()
         # Si no coincide con ningún primero, es épsilon
