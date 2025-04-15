@@ -332,6 +332,8 @@ class Parser:
     def unary(self):
         # UNARY -> ! UNARY
         #       -> - UNARY
+        #       -> ++ UNARY
+        #       -> -- UNARY
         #       -> CALL
         tipo = self.preanalisis.tipo
         
@@ -341,14 +343,25 @@ class Parser:
         elif tipo == "MINUS":
             self.coincidir("MINUS")
             self.unary()
+        elif tipo == "INCREMENT":  # ++
+            self.coincidir("INCREMENT")
+            self.unary()
+        elif tipo == "DECREMENT":  # --
+            self.coincidir("DECREMENT")
+            self.unary()
         else:
             self.call()
     
     def call(self):
-        # CALL -> PRIMARY CALL'
+        # CALL -> id (++ | -- | CALL') | PRIMARY
         if self.preanalisis.tipo == "IDENTIFIER":
             self.coincidir("IDENTIFIER")
-            if self.preanalisis.tipo == "LEFT_PAREN":
+            # Después de un identificador, puede venir un sufijo ++ o --
+            if self.preanalisis.tipo == "INCREMENT":
+                self.coincidir("INCREMENT")
+            elif self.preanalisis.tipo == "DECREMENT":
+                self.coincidir("DECREMENT")
+            elif self.preanalisis.tipo == "LEFT_PAREN":
                 self.call_prime()
         else: 
             self.primary()
