@@ -27,7 +27,7 @@ class Scanner:
             self.scan()
         
         # Agregar token de fin de archivo
-        self.tokens.append(Token(TokenType.EOF))
+        self.tokens.append(Token(TokenType.EOF, "$", None, self.linea))
         return self.tokens
             
     def fin_archivo(self):
