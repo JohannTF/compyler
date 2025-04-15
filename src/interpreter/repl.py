@@ -7,6 +7,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.lexer.scanner import Scanner
+from src.parser.parser import Parser
 
 
 def start_repl(version="0.1.0"):
@@ -35,6 +36,18 @@ def start_repl(version="0.1.0"):
             tokens = scanner.tokens
             for token in tokens:
                 print(token)
+                
+            # Verificar que se hayan leído tokens
+            if not tokens:
+                print("No se encontraron tokens para analizar")
+                return
+                    
+            # Crear el parser y analizar los tokens
+            try:
+                parser = Parser(tokens)
+                parser.parse()
+            except Exception as e:
+                print(f"Error inesperado: {e}")
             
         except EOFError:
             # Lanza la excepción con Ctrl + D (Unix o macOs) 

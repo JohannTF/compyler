@@ -2,6 +2,7 @@ import sys
 from src.lexer.scanner import Scanner
 from src.interpreter.repl import start_repl
 from src.utils.file_handler import read_file
+from src.parser.parser import Parser
 
 def procesar_archivo(archivo_fuente):
     try:
@@ -19,7 +20,19 @@ def main():
         start_repl()
     elif len(sys.argv) == 2:
         archivo_fuente = sys.argv[1]
-        procesar_archivo(archivo_fuente)
+        tokens = procesar_archivo(archivo_fuente)
+        
+        # Verificar que se hayan leído tokens
+        if not tokens:
+            print("No se encontraron tokens para analizar")
+            return
+                    
+        # Crear el parser y analizar los tokens
+        try:
+            parser = Parser(tokens)
+            parser.parse()
+        except Exception as e:
+            print(f"Error inesperado: {e}")
     else:
         print("Uso incorrecto. Proporcione un archivo o ejecute sin argumentos para el modo REPL.")
         sys.exit(1)
