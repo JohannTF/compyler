@@ -1,16 +1,11 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Script para ejecutar únicamente el REPL o leer un archivo.
 """
 import sys
-import os
-
-# Añadimos el directorio raíz al path para importar los módulos
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from src.interpreter.repl import start_repl
-from src.utils.file_handler import read_file
+from src.interpreter import start_repl
+from src.utils import read_file
+from src.lexer import Scanner
+from src.parser import Parser
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
@@ -19,10 +14,23 @@ if __name__ == "__main__":
     elif len(sys.argv) == 2:
         file_path = sys.argv[1]
         try:
-            content = read_file(file_path)
-            print(content)
+            # Leer archivo
+            source_code = read_file(file_path)
+            
+            # Análisis léxico
+            scanner = Scanner(source_code)
+            scanner.escanear_tokens()
+            tokens = scanner.tokens
+            
+            # Análisis sintáctico
+            parser = Parser(tokens)
+            if parser.parse():
+                print(f"OK")
+            else:
+                print(f"ERROR")
+                sys.exit(1)
         except Exception as e:
-            print(f"Error al leer el archivo: {e}")
+            print(f"Error al procesar el archivo: {e}")
+            sys.exit(1)
     else:
-        print("Hay más de un parámetro. Retornando a la terminal...")
         sys.exit(1)

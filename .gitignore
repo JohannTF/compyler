@@ -18,3 +18,4 @@ ENV/
 htmlcov/
 .tox/
 .vscode/
+*.egg-info

@@ -1,81 +1,48 @@
+<!-- omit from toc -->
 # 🐍 Python Compiler Project
 
-> **This project is still in development!** ⚠️
+> **This project is currently in development!** ⚠️
 
+<!-- omit from toc -->
 ## 📋 Description
 
-This Python-based compiler is built from scratch, focusing on the frontend of a compiler pipeline. The goal of this project is to provide an in-depth understanding of how a compiler works, from reading files and handling command-line arguments to performing lexical, syntactical, and semantic analysis.
+This Python-based compiler is built from scratch, focusing on the frontend of a compiler pipeline. The goal is to provide an in-depth understanding of how compilers work.
 
+<!-- omit from toc -->
 ## 📑 Table of Contents
 
-- [🐍 Python Compiler Project](#-python-compiler-project)
-  - [📋 Description](#-description)
-  - [📑 Table of Contents](#-table-of-contents)
-  - [📁 Project Structure](#-project-structure)
-    - [📂 Folders and Files Description](#-folders-and-files-description)
-  - [🛠️ Getting Started](#️-getting-started)
-    - [📋 Requirements](#-requirements)
-    - [⚙️ Installation](#️-installation)
-    - [🖥️ Usage](#️-usage)
-  - [🔄 Current Status](#-current-status)
+- [📁 Project Structure](#-project-structure)
+- [🛠️ Getting Started](#️-getting-started)
+  - [📋 Requirements](#-requirements)
+  - [⚙️ Installation](#️-installation)
+  - [🖥️ Usage](#️-usage)
+- [🔄 Current Status](#-current-status)
 
 ## 📁 Project Structure
-
-The project structure is organized as follows, considering future implementations of the other compiler stages:
-
+The project structure is organized as follows:
 ```
 .
 ├── README.md
-├── docs
-├── scripts
-│   └── run_rpl.py
+├── main.py                # Main entry point
+├── setup.py               # Environment setup
 ├── src
-│   ├── codegen
-│   ├── interpreter
-│   │   ├── __pycache__
-│   │   │   ├── repl.cpython-313.pyc
-│   │   │   └── repl.cpython-38.pyc
-│   │   └── repl.py
-│   ├── lexer
-│   │   ├── error_handler.py
-│   │   ├── keywords.py
-│   │   ├── scanner.py
-│   │   ├── token.py
-│   │   └── token_type.py
-│   ├── optimization
-│   ├── parser
-│   ├── semantic
-│   └── utils
-│       ├── __pycache__
-│       │   ├── file_handler.cpython-313.pyc
-│       │   └── file_handler.cpython-38.pyc
-│       └── file_handler.py
-└── test
+│   ├── interpreter        # Interpreter
+│   │   └── repl.py        # REPL implementation
+│   ├── lexer              # Lexical analysis
+│   │   ├── error_handler.py  # Lexical error handling
+│   │   ├── keywords.py    # Reserved keywords
+│   │   ├── scanner.py     # Lexical analyzer
+│   │   ├── token.py       # Token class
+│   │   └── token_type.py  # Token types
+│   ├── parser             # Syntactic analysis
+│   │   └── parser.py      # Parser implementation
+│   ├── semantic           # Semantic analysis (planned)
+│   └── utils              # Utilities
+│       └── file_handler.py # File handling
+└── test                   # Tests
+    ├── lexer              # Lexical analyzer tests
+    └── parser             # Parser tests
 ```
-
-### 📂 Folders and Files Description
-
-> 💡 The project follows a modular architecture where each component of the compiler pipeline has its own directory.
-
-- **docs**: Project documentation.
-- **scripts**: Scripts to run and test the project.
-  - `run_rpl.py`: Script to run the REPL or read a file.
-- **src**: Compiler source code.
-  - **codegen**: Code generation (future implementation).
-  - **interpreter**: Interpreter implementation.
-    - `repl.py`: Module that implements the REPL (Read-Eval-Print Loop).
-  - **lexer**: Lexical analysis.
-    - `error_handler.py`: Lexical error handling.
-    - `keywords.py`: Reserved words handling.
-    - `scanner.py`: Lexical analyzer that converts source code into tokens.
-    - `token.py`: Class that represents a token.
-    - `token_type.py`: Enumeration of supported token types.
-  - **optimization**: Code optimization (future implementation).
-  - **parser**: Syntactic analysis (future implementation).
-  - **semantic**: Semantic analysis (future implementation).
-  - **utils**: General utilities.
-    - `file_handler.py`: File handling and input/output.
-- **test**: Project tests.
 
 ## 🛠️ Getting Started
 
@@ -91,23 +58,35 @@ The project structure is organized as follows, considering future implementation
    cd compyler
    ```
 
+2. Set up a virtual environment (recommended):
+   ```sh
+   python -m venv env
+   ```
+
+3. ⚠️ **Important! Before proceeding, ensure the environment is properly initialized. Run this command in the powershell terminal** ⚠️
+   ```sh
+   .\env\Scripts\activate # (THIS COMMAND IS FOR WINDOWS)
+   ```
+
+4. Then, install the project in development mode:
+   ```sh
+   pip install -e .
+   ```
+
 ### 🖥️ Usage
 
-> ⚠️ **Note**: The project is currently in its early stages, focusing on lexical analysis.
+- **Start the REPL (interactive mode)**:
+  ```sh
+  python main.py
+  ```
 
-- To start the REPL:
-```sh
-python scripts/run_rpl.py
-```
-
-- To read and process a file:
-```sh
-python scripts/run_rpl.py path/to/file.txt
-```
+- **Process a source file**:
+  ```sh
+  python main.py path/to/file.txt
+  ```
 
 ## 🔄 Current Status
 
-- 🔄 Lexical Analysis (Scanner/Tokenizer)
-- ⏳ Syntax Analysis (Parser) - In Progress
-- ⏳ Semantic Analysis - Planned
-- ⏳ Code Generation - Planned
+- ✅ Lexical Analysis (Scanner/Tokenizer)
+- ✅ Syntax Analysis (Parser)
+- ⏳ Semantic Analysis - In progress

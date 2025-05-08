@@ -10,14 +10,14 @@ from src.lexer.scanner import Scanner
 from src.parser.parser import Parser
 
 
-def start_repl(version="0.1.0"):
+def start_repl():
     """
     Inicia un REPL para interactuar con el intérprete.
     
     Args:
         version (str): Versión del intérprete a mostrar
     """
-    print(f"Compilador v{version}")
+    print("Compilador")
     print("Escribe 'exit;', 'quit;', 'out;', 'bye;' o '0;' para salir")
     print()
     
