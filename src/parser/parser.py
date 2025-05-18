@@ -343,37 +343,36 @@ class Parser:
         elif tipo == "MINUS":
             self.coincidir("MINUS")
             self.unary()
-        elif tipo == "INCREMENT":  # ++
+        elif tipo == "INCREMENT":
             self.coincidir("INCREMENT")
-            self.unary()
-        elif tipo == "DECREMENT":  # --
+            self.coincidir("IDENTIFIER")
+        elif tipo == "DECREMENT": 
             self.coincidir("DECREMENT")
-            self.unary()
+            self.coincidir("IDENTIFIER")
         else:
             self.call()
     
     def call(self):
-        # CALL -> id (++ | -- | CALL') | PRIMARY
-        if self.preanalisis.tipo == "IDENTIFIER":
-            self.coincidir("IDENTIFIER")
-            # Después de un identificador, puede venir un sufijo ++ o --
-            if self.preanalisis.tipo == "INCREMENT":
-                self.coincidir("INCREMENT")
-            elif self.preanalisis.tipo == "DECREMENT":
-                self.coincidir("DECREMENT")
-            elif self.preanalisis.tipo == "LEFT_PAREN":
-                self.call_prime()
-        else: 
-            self.primary()
+        # CALL -> PRIMARY CALL'
+        self.primary()
+        self.call_prime()
     
     def call_prime(self):
         # CALL' -> ( ARGUMENTS )
-        #      -> Ɛ
-        if self.preanalisis.tipo == "LEFT_PAREN":
+        #       -> ++ (postfijo)
+        #       -> -- (postfijo)
+        #       -> Ɛ
+        tipo = self.preanalisis.tipo
+        
+        if tipo == "LEFT_PAREN":
             self.coincidir("LEFT_PAREN")
             self.arguments()
             self.coincidir("RIGHT_PAREN")
-        # Si no es (, es épsilon
+        elif tipo == "INCREMENT":
+            self.coincidir("INCREMENT")
+        elif tipo == "DECREMENT":
+            self.coincidir("DECREMENT")
+        # Si no es ninguno de estos, es épsilon
     
     def primary(self):
         # PRIMARY -> true | false | null | number | string | id | ( EXPRESSION )
