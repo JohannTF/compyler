@@ -1,5 +1,5 @@
-import expression as Expression
-import src.lexer.token as Token
+from src.parser.expression.expression import Expression
+from src.lexer.token import Token
 
 class ExprUnary(Expression):
     """

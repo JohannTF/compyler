@@ -1,5 +1,5 @@
-import statement as Statement
-import expression as Expression
+from src.parser.statement.statement import Statement
+from src.parser.expression.expression import Expression
 
 class StmtLoop(Statement):
     """
