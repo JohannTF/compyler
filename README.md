@@ -23,25 +23,29 @@ The project structure is organized as follows:
 ```
 .
 ├── README.md
-├── main.py                # Main entry point
-├── setup.py               # Environment setup
+├── main.py                   # Main entry point
+├── setup.py                  # Environment setup
 ├── src
-│   ├── interpreter        # Interpreter
-│   │   └── repl.py        # REPL implementation
-│   ├── lexer              # Lexical analysis
+│   ├── interpreter           # Interpreter
+│   │   └── repl.py           # REPL implementation
+│   ├── lexer                 # Lexical analysis
 │   │   ├── error_handler.py  # Lexical error handling
-│   │   ├── keywords.py    # Reserved keywords
-│   │   ├── scanner.py     # Lexical analyzer
-│   │   ├── token.py       # Token class
-│   │   └── token_type.py  # Token types
-│   ├── parser             # Syntactic analysis
-│   │   └── parser.py      # Parser implementation
-│   ├── semantic           # Semantic analysis (planned)
-│   └── utils              # Utilities
-│       └── file_handler.py # File handling
-└── test                   # Tests
-    ├── lexer              # Lexical analyzer tests
-    └── parser             # Parser tests
+│   │   ├── keywords.py       # Reserved keywords
+│   │   ├── scanner.py        # Lexical analyzer
+│   │   ├── token.py          # Token class
+│   │   └── token_type.py     # Token types
+│   ├── parser                # Syntactic analysis
+│   │   ├── parser.py         # Parser implementation
+│   │   ├── expression        # Expression nodes for AST
+│   │   │   └── ...           # Expression types (Binary, Unary, Literal, etc.)
+│   │   └── statement         # Statement nodes for AST
+│   │       └── ...           # Statement types (If, Loop, Function, etc.)
+│   ├── semantic              # Semantic analysis (planned)
+│   └── utils                 # Utilities
+│       └── file_handler.py   # File handling
+└── test                      # Tests
+    ├── lexer                 # Lexical analyzer tests
+    └── parser                # Parser tests
 ```
 
 ## 🛠️ Getting Started
@@ -58,12 +62,18 @@ The project structure is organized as follows:
    cd compyler
    ```
 
-2. Set up a virtual environment (recommended):
+2. Install the dependency to create virtual environments with `virtualenv`:
+   ```sh
+   pip install virtualenv
+   ```
+
+3. Set up a virtual environment:
    ```sh
    python -m venv env
    ```
-
-3. ⚠️ **Important! Before proceeding, ensure the environment is properly initialized. Run this command in the powershell terminal** ⚠️
+   > [!WARNING] IMPORTANT!  
+   > Before proceeding, make sure the environment is properly initialized after installation.  
+   > Run this command in the PowerShell terminal to activate the virtual environment:
    ```sh
    .\env\Scripts\activate # (THIS COMMAND IS FOR WINDOWS)
    ```
