@@ -1,3 +1,20 @@
+from typing import List
+
+from src.lexer.token import Token
+
+# Expressions 
+from src.parser.expression.ExprAssign import ExprAssign
+from src.parser.expression.ExprLogical import ExprLogical
+from src.parser.expression.ExprBinary import ExprBinary
+from src.parser.expression.ExprLiteral import ExprLiteral
+from src.parser.expression.ExprUnary import ExprUnary
+from src.parser.expression.ExprVariable import ExprVariable
+from src.parser.expression.ExprGrouping import ExprGrouping
+from src.parser.expression.ExprCallFunction import ExprCallFunction
+from src.parser.expression.expression import Expression
+from src.parser.statement.stmt_var import StmtVar
+
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -31,6 +48,9 @@ class Parser:
         self.current += 1
         if self.current < len(self.tokens):
             self.preanalisis = self.tokens[self.current]
+    
+    def previous(self) -> Token:
+        return self.tokens[self.current - 1] if self.current > 0 else None
     
     # Implementación de los no terminales según la gramática
     def program(self):
@@ -202,55 +222,63 @@ class Parser:
         self.declaration()
         self.coincidir("RIGHT_BRACE")
     
-    def expression(self):
+    def expression(self) -> Expression:
         # EXPRESSION -> ASSIGNMENT
-        self.assignment()
+        return self.assignment()
     
-    def assignment(self):
+    def assignment(self) -> Expression:
         # ASSIGNMENT -> LOGIC_OR ASSIGNMENT_OPC
-        self.logic_or()
-        self.assignment_opc()
+        izquierda: Expression = self.logic_or()
+        return self.assignment_opc(izquierda)
     
-    def assignment_opc(self):
+    def assignment_opc(self, izquierda: Expression) -> Expression:
         # ASSIGNMENT_OPC -> = EXPRESSION
         #                -> Ɛ
         if self.preanalisis.tipo == "EQUAL":
             self.coincidir("EQUAL")
-            self.expression()
+            valor: Expression = self.expression()
+            return ExprAssign(izquierda, valor)
         # Si no es =, es épsilon
+        return izquierda
     
-    def logic_or(self):
+    def logic_or(self) -> Expression:
         # LOGIC_OR -> LOGIC_AND LOGIC_OR'
-        self.logic_and()
-        self.logic_or_prime()
+        izquierda: Expression = self.logic_and()
+        return self.logic_or_prime(izquierda) 
     
-    def logic_or_prime(self):
+    def logic_or_prime(self, izquierda: Expression) -> Expression:
         # LOGIC_OR' -> or LOGIC_OR
         #          -> Ɛ
         if self.preanalisis.tipo == "OR":
             self.coincidir("OR")
-            self.logic_or()
+            operador: Token = self.previous()
+            derecha: Expression = self.logic_or()
+            return ExprLogical(izquierda, operador, derecha)
         # Si no es or, es épsilon
+        return izquierda
     
-    def logic_and(self):
+    def logic_and(self) -> Expression:
         # LOGIC_AND -> EQUALITY LOGIC_AND'
-        self.equality()
-        self.logic_and_prime()
+        izquierda: Expression = self.equality()
+        return self.logic_and_prime(izquierda)
     
-    def logic_and_prime(self):
+    def logic_and_prime(self, izquierda: Expression) -> Expression:
         # LOGIC_AND' -> and LOGIC_AND
         #           -> Ɛ
         if self.preanalisis.tipo == "AND":
             self.coincidir("AND")
-            self.logic_and()
+            operador: Token = self.previous()
+            derecha: Expression = self.logic_and()
+            return ExprLogical(izquierda, operador, derecha)
         # Si no es and, es épsilon
+        return izquierda
     
-    def equality(self):
+    def equality(self) -> Expression:
         # EQUALITY -> COMPARISON EQUALITY'
-        self.comparison()
-        self.equality_prime()
+        izquierda: Expression = self.comparison()
+        return self.equality_prime(izquierda)
     
-    def equality_prime(self):
+    def equality_prime(self, izquierda: Expression) -> Expression:
         # EQUALITY' -> != EQUALITY
         #          -> == EQUALITY
         #          -> Ɛ
@@ -258,18 +286,23 @@ class Parser:
         
         if tipo == "BANG_EQUAL":
             self.coincidir("BANG_EQUAL")
-            self.equality()
+            operador: Token = self.previous()
+            derecha: Expression = self.equality()
+            return ExprBinary(izquierda, operador, derecha)
         elif tipo == "EQUAL_EQUAL":
             self.coincidir("EQUAL_EQUAL")
-            self.equality()
+            operador: Token = self.previous()
+            derecha: Expression = self.equality()
+            return ExprBinary(izquierda, operador, derecha)
         # Si no es != o ==, es épsilon
+        return izquierda
     
-    def comparison(self):
+    def comparison(self) -> Expression:
         # COMPARISON -> TERM COMPARISON'
-        self.term()
-        self.comparison_prime()
+        izquierda: Expression = self.term()
+        return self.comparison_prime(izquierda)
     
-    def comparison_prime(self):
+    def comparison_prime(self, izquierda: Expression) -> Expression:
         # COMPARISON' -> > COMPARISON
         #            -> >= COMPARISON
         #            -> < COMPARISON
@@ -279,24 +312,33 @@ class Parser:
         
         if tipo == "GREATER":
             self.coincidir("GREATER")
-            self.comparison()
+            operador: Token = self.previous()
+            derecha:Expression = self.comparison()
+            return ExprBinary(izquierda, operador, derecha)
         elif tipo == "GREATER_EQUAL":
             self.coincidir("GREATER_EQUAL")
-            self.comparison()
+            operador: Token = self.previous()
+            derecha: Expression = self.comparison()
+            return ExprBinary(izquierda, operador, derecha)
         elif tipo == "LESS":
             self.coincidir("LESS")
-            self.comparison()
+            operador: Token= self.previous()
+            derecha: Expression = self.comparison()
+            return ExprBinary(izquierda, operador, derecha)
         elif tipo == "LESS_EQUAL":
             self.coincidir("LESS_EQUAL")
-            self.comparison()
+            operador: Token = self.previous()
+            derecha: Expression = self.comparison()
+            return ExprBinary(izquierda, operador, derecha)
         # Si no es >, >=, < o <=, es épsilon
+        return izquierda
     
-    def term(self):
+    def term(self) -> Expression:
         # TERM -> FACTOR TERM'
-        self.factor()
-        self.term_prime()
+        izquierda: Expression = self.factor()
+        return self.term_prime(izquierda)
     
-    def term_prime(self):
+    def term_prime(self, izquierda: Expression) -> Expression:
         # TERM' -> - TERM
         #      -> + TERM
         #      -> Ɛ
@@ -304,18 +346,23 @@ class Parser:
         
         if tipo == "MINUS":
             self.coincidir("MINUS")
-            self.term()
+            operador: Token = self.previous()
+            derecha: Expression = self.term()
+            return ExprBinary(izquierda, operador, derecha)
         elif tipo == "PLUS":
             self.coincidir("PLUS")
-            self.term()
+            operador: Token = self.previous()
+            derecha: Expression = self.term()
+            return ExprBinary(izquierda, operador, derecha)
         # Si no es - o +, es épsilon
-    
-    def factor(self):
+        return izquierda
+      
+    def factor(self) -> Expression:
         # FACTOR -> UNARY FACTOR'
-        self.unary()
-        self.factor_prime()
+        izquierda: Expression = self.unary()
+        return self.factor_prime(izquierda)
     
-    def factor_prime(self):
+    def factor_prime(self, izquierda: Expression) -> Expression:
         # FACTOR' -> / FACTOR
         #        -> * FACTOR
         #        -> Ɛ
@@ -323,13 +370,18 @@ class Parser:
         
         if tipo == "SLASH":
             self.coincidir("SLASH")
-            self.factor()
+            operador: Token = self.previous()
+            derecha: Expression = self.factor()
+            return ExprBinary(izquierda, operador, derecha)
         elif tipo == "STAR":
             self.coincidir("STAR")
-            self.factor()
+            operador: Token = self.previous()
+            derecha: Expression = self.factor()
+            return ExprBinary(izquierda, operador, derecha)
         # Si no es / o *, es épsilon
+        return izquierda
     
-    def unary(self):
+    def unary(self) -> Expression:
         # UNARY -> ! UNARY
         #       -> - UNARY
         #       -> ++ UNARY
@@ -339,25 +391,35 @@ class Parser:
         
         if tipo == "BANG":
             self.coincidir("BANG")
-            self.unary()
+            operador: Token = self.previous()
+            derecha: Expression = self.unary()
+            return ExprUnary(operador, derecha)
         elif tipo == "MINUS":
             self.coincidir("MINUS")
-            self.unary()
+            operador: Token = self.previous()
+            derecha: Expression = self.unary()
+            return ExprUnary(operador, derecha)
         elif tipo == "INCREMENT":
             self.coincidir("INCREMENT")
+            operador: Token = self.previous()
             self.coincidir("IDENTIFIER")
+            derecha: Expression = self.previous()
+            return ExprUnary(operador, derecha)
         elif tipo == "DECREMENT": 
             self.coincidir("DECREMENT")
+            operador: Token = self.previous()
             self.coincidir("IDENTIFIER")
+            derecha: Expression = self.previous()
+            return ExprUnary(operador, derecha)
         else:
-            self.call()
-    
-    def call(self):
+            return self.call()
+      
+    def call(self) -> Expression:
         # CALL -> PRIMARY CALL'
-        self.primary()
-        self.call_prime()
+        expresion: Expression = self.primary()
+        return self.call_prime(expresion)
     
-    def call_prime(self):
+    def call_prime(self, callee: Expression) -> Expression:
         # CALL' -> ( ARGUMENTS )
         #       -> ++ (postfijo)
         #       -> -- (postfijo)
@@ -366,36 +428,48 @@ class Parser:
         
         if tipo == "LEFT_PAREN":
             self.coincidir("LEFT_PAREN")
-            self.arguments()
+            argumentos: List[Expression] = self.arguments()
             self.coincidir("RIGHT_PAREN")
+            return ExprCallFunction(callee, argumentos)
         elif tipo == "INCREMENT":
             self.coincidir("INCREMENT")
+            return ExprUnary(self.previous(), callee)
         elif tipo == "DECREMENT":
             self.coincidir("DECREMENT")
+            return ExprUnary(self.previous(), callee)
         # Si no es ninguno de estos, es épsilon
+        return callee
     
-    def primary(self):
+    def primary(self) -> Expression:
         # PRIMARY -> true | false | null | number | string | id | ( EXPRESSION )
         tipo = self.preanalisis.tipo
         
         if tipo == "TRUE":
             self.coincidir("TRUE")
+            return ExprLiteral(self.previous().literal)
         elif tipo == "FALSE":
             self.coincidir("FALSE")
+            return ExprLiteral(self.previous().literal)
         elif tipo == "NULL":
             self.coincidir("NULL")
+            return ExprLiteral(self.previous().literal)
         elif tipo in ["INT", "FLOAT"]:
             self.coincidir(tipo)
+            return ExprLiteral(self.previous().literal)
         elif tipo == "STRING":
             self.coincidir("STRING")
+            return ExprLiteral(self.previous().literal)
         elif tipo == "IDENTIFIER":
             self.coincidir("IDENTIFIER")
+            return ExprVariable(self.previous().literal)
         elif tipo == "LEFT_PAREN":
             self.coincidir("LEFT_PAREN")
-            self.expression()
+            expresion: Expression = self.expression()
             self.coincidir("RIGHT_PAREN")
+            return expresion
         else:
             self.error(["TRUE", "FALSE", "NULL", "INT", "FLOAT", "STRING", "IDENTIFIER", "LEFT_PAREN"])
+            return ExprLiteral(None)
     
     def parameters(self):
         # PARAMETERS -> id PARAMETERS'
@@ -414,19 +488,21 @@ class Parser:
             self.parameters_prime()
         # Si no es ,, es épsilon
     
-    def arguments(self):
+    def arguments(self) -> List[Expression]:
         # ARGUMENTS -> EXPRESSION ARGUMENTS'
         #          -> Ɛ
+        args: List[Expression] = []
         if self.preanalisis.tipo != "RIGHT_PAREN":
-            self.expression()
-            self.arguments_prime()
+            args.append(self.expression())
+            self.arguments_prime(args)
+        return args
         # Si es ), es épsilon
     
-    def arguments_prime(self):
+    def arguments_prime(self, args: List[Expression]):
         # ARGUMENTS' -> , EXPRESSION ARGUMENTS'
         #           -> Ɛ
         if self.preanalisis.tipo == "COMMA":
             self.coincidir("COMMA")
-            self.expression()
-            self.arguments_prime()
-        # Si no es ,, es épsilon
+            args.append(self.expression())
+            self.arguments_prime(args)
+        # Si no es , es épsilon
