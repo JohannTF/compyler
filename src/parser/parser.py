@@ -63,9 +63,10 @@ class Parser:
         return self.tokens[self.current - 1] if self.current > 0 else None
     
     # Implementación de los no terminales según la gramática
-    def program(self):
+    def program(self) -> List[Statement]:
         # PROGRAM -> DECLARATION
-        self.declaration()
+        stmts: List[Statement] = []        
+        return self.declaration(stmts)
     
     def declaration(self, stmts: List[Statement]):
         # DECLARATION -> FUN_DECL DECLARATION
