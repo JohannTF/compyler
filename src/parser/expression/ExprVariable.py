@@ -6,12 +6,11 @@ class ExprVariable(Expression):
     Clase que representa una expresión lógica con un operador entre dos expresiones.
     """
     
-    def __init__(self, name: 'Token'):
+    def __init__(self, name: Token):
         """
         Constructor para la expresión lógica.
         
         Args:
-            operator (Token): El token del operador lógico.
-            right (Expression): La expresión del lado derecho.
+            name (Token): El token que representa el nombre de la variable.
         """
         self.name = name

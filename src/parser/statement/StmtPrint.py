@@ -6,12 +6,11 @@ class StmtLoop(Statement):
     Clase que representa una expresión lógica con un operador entre dos expresiones.
     """
     
-    def __init__(self, expression: 'Expression'):
+    def __init__(self, expression: Expression):
         """
         Constructor para la expresión lógica.
         
         Args:
-            operator (Token): El token del operador lógico.
-            right (Expression): La expresión del lado derecho.
+            expression (Expression): La expresión que se va a imprimir.
         """
         self.expression = expression
