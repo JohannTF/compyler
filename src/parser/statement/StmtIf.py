@@ -1,7 +1,7 @@
 from src.parser.statement.statement import Statement
 from src.parser.expression.expression import Expression
 
-class StmtLoop(Statement):
+class StmtIf(Statement):
     """
     Clase que representa una expresión lógica con un operador entre dos expresiones.
     """
@@ -18,4 +18,3 @@ class StmtLoop(Statement):
         self.condition = condition
         self.thenBranch = thenBranch
         self.elseBranch = elseBranch
-        
