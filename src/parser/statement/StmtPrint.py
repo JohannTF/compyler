@@ -1,7 +1,7 @@
 from src.parser.statement.statement import Statement
 from src.parser.expression.expression import Expression
 
-class StmtLoop(Statement):
+class StmtPrint(Statement):
     """
     Clase que representa una expresión lógica con un operador entre dos expresiones.
     """

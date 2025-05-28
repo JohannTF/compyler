@@ -15,14 +15,15 @@ from src.parser.expression.expression import Expression
 
 # Statements
 from src.parser.statement.stmt_var import StmtVar
-from src.parser.statement.stmt_function import StmtFun
+from src.parser.statement.stmt_function import StmtFunction
 from src.parser.statement.stmt_block import StmtBlock
-from src.parser.statement.StmtIf import Stmtif
+from src.parser.statement.StmtIf import StmtIf
 from src.parser.statement.StmtLoop import StmtLoop
-from src.parser.statement.StmtPrint import Stmtprint
+from src.parser.statement.StmtPrint import StmtPrint
 from src.parser.statement.stmt_return import StmtReturn
 from src.parser.statement.stmt_expression import StmtExpression
 from src.parser.statement.statement import Statement
+from src.parser.statement.StmtPrint import StmtPrint
 
 
 class Parser:
@@ -63,10 +64,10 @@ class Parser:
         return self.tokens[self.current - 1] if self.current > 0 else None
     
     # Implementación de los no terminales según la gramática
-    def program(self) -> List[Statement]:
+    def program(self):
         # PROGRAM -> DECLARATION
-        stmts: List[Statement] = []        
-        return self.declaration(stmts)
+        stmts: List[Statement] = []     
+        self.declaration(stmts)
     
     def declaration(self, stmts: List[Statement]):
         # DECLARATION -> FUN_DECL DECLARATION
@@ -84,7 +85,7 @@ class Parser:
             self.declaration(stmts)
 
         elif tipo == "VAR":
-            vard: Expression = self.var_decl()
+            vard: Statement = self.var_decl()
             stmts.append(vard)
             self.declaration(stmts)
             
@@ -106,7 +107,7 @@ class Parser:
         parameters: List[Token] = self.parameters()
         self.coincidir("RIGHT_PAREN")
         body: StmtBlock = self.block()
-        return StmtFun(name, parameters, body)
+        return StmtFunction(name, parameters, body)
     
     def var_decl(self) -> Statement:
         # VAR_DECL -> var id VAR_INIT ;
@@ -138,27 +139,20 @@ class Parser:
         tipo = self.preanalisis.tipo
         
         if tipo == "FOR":
-            forS: Statement = self.for_stmt()
-            return forS
+            return self.for_stmt()
         elif tipo == "IF":
-            ifS: Statement = self.if_stmt()
-            return ifS
+            return self.if_stmt()
         elif tipo == "PRINT":
-            printS: Statement = self.print_stmt()
-            return printS
+            return self.print_stmt()
         elif tipo == "RETURN":
-            returnS: Statement = self.return_stmt()
-            return returnS
+            return self.return_stmt()
         elif tipo == "WHILE":
-            whileS: Statement = self.while_stmt()
-            return whileS
+            return self.while_stmt()
         elif tipo == "LEFT_BRACE":
-            blockS: Statement = self.block()
-            return blockS
+            return self.block()
         else:
             # Si no coincide con ninguna de las anteriores, debe ser una expresión
-            exprS: Statement = self.expr_stmt()
-            return exprS
+            return self.expr_stmt()
     
     def expr_stmt(self) -> Statement:
         # EXPR_STMT -> EXPRESSION ;
@@ -175,10 +169,20 @@ class Parser:
         inc: StmtExpression = self.for_stmt_inc()
         self.coincidir("RIGHT_PAREN")
         body: Statement = self.statement()
-        firstBlock: StmtBlock = StmtBlock([body, inc])
-        body = firstBlock
-        secondBlock: StmtLoop = StmtLoop(condicion, body)
-        return StmtBlock([init, secondBlock])
+        
+        # Azúcar sintáctico
+        if inc is not None:
+            body: StmtBlock = StmtBlock([body, inc])
+            
+        if condicion is None:
+            condicion = ExprLiteral(True)
+        
+        loop = StmtLoop(condicion, body)
+        
+        if init is None:
+            return loop
+        
+        return StmtBlock([inc, loop])
     
     def for_stmt_init(self) -> Statement:
         # FOR_STMT_INIT -> VAR_DECL
@@ -187,35 +191,32 @@ class Parser:
         tipo = self.preanalisis.tipo
         
         if tipo == "VAR":
-            varS: Statement = self.var_decl()
-            return varS
+            return self.var_decl()
         elif tipo == "SEMICOLON":
+            # No hay declaración
             self.coincidir("SEMICOLON")
-            return StmtExpression(ExprLiteral(None))  # Épsilon, no hay inicialización
+            return None
         else:
-            exprS: Expression = self.expr_stmt()
-            # Si no es var o punto y coma, debe ser una expresión
-            return exprS
+            return self.expr_stmt()
+            # Si no es var o punto y coma, debe ser una expresión SI O SI
     
-    def for_stmt_cond(self) -> Statement:
+    def for_stmt_cond(self) -> Expression:
         # FOR_STMT_COND -> EXPRESSION ;
         #               -> ;
         if self.preanalisis.tipo != "SEMICOLON":
-            condicion: Expression = self.expression()
-            return ExprLiteral(condicion)
+            return self.expression()
         self.coincidir("SEMICOLON")
         # Si es punto y coma, es épsilon
-        return condicion
-        
-    
+        return None
+         
     def for_stmt_inc(self) -> Statement:
         # FOR_STMT_INC -> EXPRESSION
         #              -> Ɛ
         if self.preanalisis.tipo != "RIGHT_PAREN":
             inc: Expression = self.expression()
-            return inc
+            return StmtExpression(inc)
         # Si no es expresión, es épsilon
-        return StmtExpression(ExprLiteral(None))
+        return None
     
     def if_stmt(self) -> Statement:
         # IF_STMT -> if ( EXPRESSION ) STATEMENT ELSE_STATEMENT
@@ -225,24 +226,23 @@ class Parser:
         self.coincidir("RIGHT_PAREN")
         body: Statement = self.statement()
         elseS: Statement = self.else_statement()
-        return Stmtif(condicion, body, elseS)
+        return StmtIf(condicion, body, elseS)
     
     def else_statement(self) -> Statement:
         # ELSE_STATEMENT -> else STATEMENT
         #                -> Ɛ
         if self.preanalisis.tipo == "ELSE":
             self.coincidir("ELSE")
-            elseS: Statement = self.statement()
-            return elseS
+            return self.statement()
         # Si no es else, es épsilon
-        return StmtExpression(ExprLiteral(None))
+        return None
     
     def print_stmt(self) -> Statement:
         # PRINT_STMT -> print EXPRESSION ;
         self.coincidir("PRINT")
         printThing: Expression = self.expression()
         self.coincidir("SEMICOLON")
-        return Stmtprint(printThing)
+        return StmtPrint(printThing)
     
     def return_stmt(self) -> Statement:
         # RETURN_STMT -> return RETURN_EXP_OPC ;
@@ -255,10 +255,9 @@ class Parser:
         # RETURN_EXP_OPC -> EXPRESSION
         #                -> Ɛ
         if self.preanalisis.tipo not in ["SEMICOLON"]:
-            returnThing: Expression = self.expression()
-            return returnThing
+            return self.expression()
         # Si es punto y coma, es épsilon
-        return StmtExpression(ExprLiteral(None))
+        return None
     
     def while_stmt(self) -> Statement:
         # WHILE_STMT -> while ( EXPRESSION ) STATEMENT
@@ -273,7 +272,7 @@ class Parser:
         # BLOCK -> { DECLARATION }
         blocks: List[Statement] = []
         self.coincidir("LEFT_BRACE")
-        self.declaration(blocks)
+        blocks.append(self.declaration(blocks))
         self.coincidir("RIGHT_BRACE")
         return StmtBlock(blocks)
     
@@ -521,10 +520,10 @@ class Parser:
             self.coincidir("LEFT_PAREN")
             expresion: Expression = self.expression()
             self.coincidir("RIGHT_PAREN")
-            return expresion
+            return ExprGrouping(expresion)
         else:
             self.error(["TRUE", "FALSE", "NULL", "INT", "FLOAT", "STRING", "IDENTIFIER", "LEFT_PAREN"])
-            return ExprLiteral(None)
+            return None
     
     def parameters(self) -> List[Token]:
         # PARAMETERS -> id PARAMETERS'
@@ -532,6 +531,7 @@ class Parser:
         parametros_list: List[Token] = []
         if self.preanalisis.tipo == "IDENTIFIER":
             self.coincidir("IDENTIFIER")
+            parametros_list.append(self.previous())
             self.parameters_prime(parametros_list)
         # Si no es id, es épsilon
         return parametros_list
