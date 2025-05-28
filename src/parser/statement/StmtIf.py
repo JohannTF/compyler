@@ -18,3 +18,8 @@ class StmtIf(Statement):
         self.condition = condition
         self.thenBranch = thenBranch
         self.elseBranch = elseBranch
+
+    def __str__(self):
+        return f"StmtIf ({self.condition},{self.thenBranch},{self.elseBranch})"
+
+      

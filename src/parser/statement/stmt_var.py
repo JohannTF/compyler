@@ -12,3 +12,8 @@ class StmtVar(Statement):
         """
         self.name = name
         self.initializer = initializer
+
+    def __str__(self):
+        return f"StmtVar ({self.name},{self.initializer})"
+        
+ 

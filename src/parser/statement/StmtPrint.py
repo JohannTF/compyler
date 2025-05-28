@@ -14,3 +14,9 @@ class StmtPrint(Statement):
             expression (Expression): La expresión que se va a imprimir.
         """
         self.expression = expression
+
+
+    def __str__(self):
+        return f"StmtPrint ({self.expression})"
+
+

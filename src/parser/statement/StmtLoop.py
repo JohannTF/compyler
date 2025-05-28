@@ -16,3 +16,8 @@ class StmtLoop(Statement):
         """
         self.condition = condition
         self.body = body
+
+    def __str__(self):
+        return f"StmtLoop ({self.condition},{self.body})"
+        
+   

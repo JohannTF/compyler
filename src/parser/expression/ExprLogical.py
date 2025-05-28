@@ -18,3 +18,7 @@ class ExprLogical(Expression):
         self.left = left
         self.operator = operator
         self.right = right
+
+
+    def __str__(self):
+        return f"ExprLogical ({self.left},{self.operator},{self.right})"

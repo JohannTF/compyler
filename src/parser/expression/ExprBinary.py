@@ -7,3 +7,7 @@ class ExprBinary(Expression):
         self.operator = operator
         self.right = right
     
+
+    def __str__(self):
+        return f"ExprBinary ({self.left},{self.operator},{self.right})"
+        

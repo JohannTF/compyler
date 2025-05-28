@@ -14,3 +14,8 @@ class ExprVariable(Expression):
             name (Token): El token que representa el nombre de la variable.
         """
         self.name = name
+
+   def __str__(self):
+        return f"ExprLogical ({self.name})"
+
+        

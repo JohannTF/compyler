@@ -7,3 +7,7 @@ class ExprArithmetic(Expression):
         self.left = left   
         self.operator = operator  
         self.right = right   
+
+    def __str__(self):
+        return f"ExprArithmetic ({self.left},{self.operator},{self.right})"
+        

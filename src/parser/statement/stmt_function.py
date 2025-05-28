@@ -9,3 +9,7 @@ class StmtFunction(Statement):
         self.name = name
         self.params = params
         self.body = body
+    def __str__(self):
+        return f"StmtFunction ({self.name},{self.params},{self.body})"
+        
+        
