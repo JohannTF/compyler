@@ -517,7 +517,7 @@ class Parser:
             return ExprLiteral(self.previous().literal)
         elif tipo == "IDENTIFIER":
             self.coincidir("IDENTIFIER")
-            return ExprVariable(self.previous().literal)
+            return ExprVariable(self.previous())
         elif tipo == "LEFT_PAREN":
             self.coincidir("LEFT_PAREN")
             expresion: Expression = self.expression()
