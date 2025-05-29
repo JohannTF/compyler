@@ -178,11 +178,11 @@ class Parser:
             condicion = ExprLiteral(True)
         
         loop = StmtLoop(condicion, body)
-        
+
         if init is None:
             return loop
         
-        return StmtBlock([inc, loop])
+        return StmtBlock([init, loop])
     
     def for_stmt_init(self) -> Statement:
         # FOR_STMT_INIT -> VAR_DECL
@@ -204,7 +204,9 @@ class Parser:
         # FOR_STMT_COND -> EXPRESSION ;
         #               -> ;
         if self.preanalisis.tipo != "SEMICOLON":
-            return self.expression()
+            expresion: Expression = self.expression()
+            self.coincidir("SEMICOLON")
+            return expresion
         self.coincidir("SEMICOLON")
         # Si es punto y coma, es épsilon
         return None

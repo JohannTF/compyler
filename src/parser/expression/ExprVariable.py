@@ -15,7 +15,7 @@ class ExprVariable(Expression):
         """
         self.name = name
 
-   def __str__(self):
+    def __str__(self):
         return f"ExprLogical ({self.name})"
 
         
