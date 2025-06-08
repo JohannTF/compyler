@@ -23,7 +23,6 @@ from src.parser.statement.StmtPrint import StmtPrint
 from src.parser.statement.stmt_return import StmtReturn
 from src.parser.statement.stmt_expression import StmtExpression
 from src.parser.statement.statement import Statement
-from src.parser.statement.StmtPrint import StmtPrint
 
 
 class Parser:
@@ -35,7 +34,7 @@ class Parser:
     def parse(self):
         try:
             self.program()
-            if self.preanalisis.tipo == "EOF":
+            if self.preanalisis is None or self.preanalisis.tipo == "EOF":
                 print("Programa válido")
                 return True
             else:
@@ -59,6 +58,8 @@ class Parser:
         self.current += 1
         if self.current < len(self.tokens):
             self.preanalisis = self.tokens[self.current]
+        else:
+            self.preanalisis = None
     
     def previous(self) -> Token:
         return self.tokens[self.current - 1] if self.current > 0 else None
@@ -270,13 +271,13 @@ class Parser:
         body: Statement = self.statement()
         return StmtLoop(condicion, body)
     
-    def block(self) -> List[Statement]:
+    def block(self) -> StmtBlock:
         # BLOCK -> { DECLARATION }
-        blocks: List[Statement] = []
+        statements: List[Statement] = []
         self.coincidir("LEFT_BRACE")
-        blocks.append(self.declaration(blocks))
+        self.declaration(statements)
         self.coincidir("RIGHT_BRACE")
-        return StmtBlock(blocks)
+        return StmtBlock(statements)
     
     def expression(self) -> Expression:
         # EXPRESSION -> ASSIGNMENT
@@ -293,7 +294,10 @@ class Parser:
         if self.preanalisis.tipo == "EQUAL":
             self.coincidir("EQUAL")
             valor: Expression = self.expression()
-            return ExprAssign(izquierda, valor)
+            if isinstance(izquierda, ExprVariable):
+                return ExprAssign(izquierda.name, valor)
+            else:
+                self.error(["variable válida para asignación"])
         # Si no es =, es épsilon
         return izquierda
     
@@ -459,13 +463,15 @@ class Parser:
             self.coincidir("INCREMENT")
             operador: Token = self.previous()
             self.coincidir("IDENTIFIER")
-            derecha: Expression = self.previous()
+            variable: Token = self.previous()
+            derecha: Expression = ExprVariable(variable)
             return ExprUnary(operador, derecha)
         elif tipo == "DECREMENT": 
             self.coincidir("DECREMENT")
             operador: Token = self.previous()
             self.coincidir("IDENTIFIER")
-            derecha: Expression = self.previous()
+            variable: Token = self.previous()
+            derecha: Expression = ExprVariable(variable)
             return ExprUnary(operador, derecha)
         else:
             return self.call()
