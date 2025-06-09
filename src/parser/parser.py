@@ -33,10 +33,10 @@ class Parser:
         
     def parse(self):
         try:
-            self.program()
+            ast = self.program()
             if self.preanalisis is None or self.preanalisis.tipo == "EOF":
                 print("Programa válido")
-                return True
+                return ast
             else:
                 self.error(["EOF"])
                 return False
@@ -65,10 +65,11 @@ class Parser:
         return self.tokens[self.current - 1] if self.current > 0 else None
     
     # Implementación de los no terminales según la gramática
-    def program(self):
+    def program(self) -> List[Statement]:
         # PROGRAM -> DECLARATION
         stmts: List[Statement] = []     
         self.declaration(stmts)
+        return stmts
     
     def declaration(self, stmts: List[Statement]):
         # DECLARATION -> FUN_DECL DECLARATION

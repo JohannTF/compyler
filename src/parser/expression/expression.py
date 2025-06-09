@@ -1,4 +1,8 @@
-from abc import ABC
+from abc import ABC, abstractmethod
+from src.interpreter.visitor_expression import VisitorExpression
 
 class Expression(ABC):
-    pass
+    
+    @abstractmethod
+    def accept(self, visitor: VisitorExpression):
+        pass

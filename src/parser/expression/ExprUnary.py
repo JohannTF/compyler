@@ -1,21 +1,14 @@
 from src.parser.expression.expression import Expression
 from src.lexer.token import Token
+from src.interpreter.visitor_expression import VisitorExpression
 
 class ExprUnary(Expression):
-    """
-    Clase que representa una expresión lógica con un operador entre dos expresiones.
-    """
-    
     def __init__(self, operator: Token, right: Expression):
-        """
-        Constructor para la expresión lógica.
-        
-        Args:
-            operator (Token): El token del operador lógico.
-            right (Expression): La expresión del lado derecho.
-        """
         self.operator = operator
         self.right = right
+    
+    def accept(self, visitor: VisitorExpression):
+        return visitor.visit_unary_expression(self)
 
     def __str__(self):
-        return f"ExprLogical ({self.operator},{self.right})"
+        return f"ExprUnary ({self.operator},{self.right})"

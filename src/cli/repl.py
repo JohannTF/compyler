@@ -1,11 +1,6 @@
 """
 Módulo que implementa el REPL (Read-Eval-Print Loop) para interacción interactiva.
 """
-import sys
-import os
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from src.lexer.scanner import Scanner
 from src.parser.parser import Parser
 

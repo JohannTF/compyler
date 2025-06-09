@@ -1,8 +1,9 @@
 import sys
 from src.lexer.scanner import Scanner
-from src.interpreter.repl import start_repl
+from src.cli.repl import start_repl
 from src.utils.file_handler import read_file as read_source_file
 from src.parser.parser import Parser
+from src.interpreter.interpreter import Interpreter
 
 def read_file(source_file):
     """Lee un archivo y devuelve su contenido como texto."""
@@ -35,6 +36,18 @@ def syntax_analysis(tokens):
         return parser.parse()
     except Exception as e:
         print(f"Error en el análisis sintáctico: {e}")
+        return None
+
+def interpret_ast(ast):
+    if not ast or ast is False:
+        return False
+    
+    try:
+        interpreter = Interpreter()
+        interpreter.interpret(ast)
+        return True
+    except Exception as e:
+        print(f"Error en la interpretación: {e}")
         return False
 
 def process_file(source_file):
@@ -47,8 +60,9 @@ def process_file(source_file):
     if not tokens:
         return False
     
-    has_valid_sintax = syntax_analysis(tokens)
-    return has_valid_sintax
+    ast = syntax_analysis(tokens)
+    
+    return interpret_ast(ast)
 
 def main():
     if len(sys.argv) == 1:
