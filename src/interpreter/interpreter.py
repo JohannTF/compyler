@@ -55,7 +55,7 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
         return expression.value
     
     def visit_grouping_expression(self, expression: ExprGrouping) -> Any:
-        pass
+        return self._evaluate(expression.expression)
     
     def visit_unary_expression(self, expression: ExprUnary) -> Any:
         pass
@@ -64,19 +64,58 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
         pass
     
     def visit_variable_expression(self, expression: ExprVariable) -> Any:
-        pass
+        return self.environment.get(expression.name)
     
     def visit_assign_expression(self, expression: ExprAssign) -> Any:
-        pass
+        value = self._evaluate(expression.value)
+        self.environment.assign(expression.name, value)
+        return value
+    
+    """
     
     def visit_arithmetic_expression(self, expression: ExprArithmetic) -> Any:
-        pass
+        def visit_arithmetic_expression(self, expression: ExprArithmetic) -> Any:
+        left = self._evaluate(expression.left)
+        right = self._evaluate(expression.right)
+
+        operator = expression.operator.lexema
+
+        if operator == "+":
+            return left + right
+        elif operator == "-":
+            return left - right
+        elif operator == "*":
+            return left * right
+        elif operator == "/":
+            if right == 0:
+                raise RuntimeError(expression.operator, "Division by zero.")
+            return left / right
+        elif operator == "%":
+            return left % right
+        elif operator == "**":
+            return left ** right
+        else:
+            raise RuntimeError(expression.operator, f"Unknown operator '{operator}'")
+"""
     
+    """
     def visit_logical_expression(self, expression: ExprLogical) -> Any:
-        pass
-    
+        left = self._evaluate(expression.left)
+
+        if expression.operator.lexema == "or":
+            if self._is_truthy(left):
+                return left
+        else:  
+            if not self._is_truthy(left):
+                return left
+
+        return self._evaluate(expression.right)
+
+        """
+        
     def visit_call_expression(self, expression: ExprCallFunction) -> Any:
         pass
+        
     
     # STATEMENTS
     
