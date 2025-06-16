@@ -121,7 +121,7 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
         elif operator == "!=":
             return left != right
         else:
-            raise RuntimeError(expression.operator, f"Operador no soportado: {operator}")
+            raise RuntimeError(expression.operator, f"Operador desconocido: {operator}")
 
     """
         
@@ -151,14 +151,14 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
             return left * right
         elif operator == "/":
             if right == 0:
-                raise RuntimeError(expression.operator, "Division by zero.")
+                raise RuntimeError(expression.operator, "Division entre cero.")
             return left / right
         elif operator == "%":
             return left % right
         elif operator == "**":
             return left ** right
         else:
-            raise RuntimeError(expression.operator, f"Unknown operator '{operator}'")
+            raise RuntimeError(expression.operator, f"operador desconocido '{operator}'")
 """
     
     """
