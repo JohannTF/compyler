@@ -57,11 +57,74 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
     def visit_grouping_expression(self, expression: ExprGrouping) -> Any:
         return self._evaluate(expression.expression)
     
+"""
+
     def visit_unary_expression(self, expression: ExprUnary) -> Any:
-        pass
+    operator = expression.operator.lexema
+    right = self._evaluate(expression.right)
+
+    if operator == "-":
+        return -right
+    elif operator == "!":
+        return not self._is_truthy(right)
+    elif operator in ("++", "--"):
+        if not isinstance(expression.right, ExprVariable):
+            raise RuntimeError(expression.operator, "El operador de incremento/decremento solo puede aplicarse a variables.")
+
+        # Obtener nombre de variable y valor actual
+        var_name = expression.right.name
+        current_value = self.environment.get(var_name)
+
+        if not isinstance(current_value, (int, float)):
+            raise RuntimeError(expression.operator, "El operador de incremento/decremento solo funciona con números.")
+
+        new_value = current_value + 1 if operator == "++" else current_value - 1
+        self.environment.assign(var_name, new_value)
+
+        # Si es prefijo: retornar el nuevo valor
+        # Si es postfijo: retornar el valor original
+        return new_value if expression.is_prefix else current_value
+    else:
+        raise RuntimeError(expression.operator, f"Operador unario desconocido: {operator}")
+        
+        
+     """
     
+
+"""
+
     def visit_binary_expression(self, expression: ExprBinary) -> Any:
-        pass
+        left = self._evaluate(expression.left)
+        right = self._evaluate(expression.right)
+        operator = expression.operator.lexema
+
+        if operator == "+":
+            return left + right
+        elif operator == "-":
+            return left - right
+        elif operator == "*":
+            return left * right
+        elif operator == "/":
+            if right == 0:
+                raise RuntimeError(expression.operator, "División entre cero.")
+            return left / right
+        elif operator == ">":
+            return left > right
+        elif operator == ">=":
+            return left >= right
+        elif operator == "<":
+            return left < right
+        elif operator == "<=":
+            return left <= right
+        elif operator == "==":
+            return left == right
+        elif operator == "!=":
+            return left != right
+        else:
+            raise RuntimeError(expression.operator, f"Operador no soportado: {operator}")
+
+    """
+        
     
     def visit_variable_expression(self, expression: ExprVariable) -> Any:
         return self.environment.get(expression.name)
