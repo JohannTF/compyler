@@ -57,20 +57,31 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
     def visit_grouping_expression(self, expression: ExprGrouping) -> Any:
         return self._evaluate(expression.expression)
     
-"""
-
+    """
+    # Recuerda identar un tab justo despues de la definición de la función como en el resto de funciones
     def visit_unary_expression(self, expression: ExprUnary) -> Any:
-    operator = expression.operator.lexema
+    # Los operadores no se almacenan lexemas, sino en el atributo 'tipos' (Puedes checar que tipos hay en src\lexer\token_type.py)
+    operator = expression.operator.tipo
     right = self._evaluate(expression.right)
 
-    if operator == "-":
-        return -right
-    elif operator == "!":
+    # Y, dado que no son lexemas, debes colocar el texto que aparece en src\lexer\token_type.py para identificar el tipo de operador al que pertenece
+    # Este es solo un ejemplo pero, aplica lo mismo para el resto de operadores...
+    if operator == "MINUS":
+        # Previo a retornar '-right', verifica si se trata de un entero o un flotante el valor
+        if isinstance(right, (int, float)):
+            return -right
+        else:
+            raise RuntimeError(expression.operator, "Operand must be a number.")
+    elif operator == "BANG":
+        # Esta bien el método is_thruty para verificar que efectivamente sea un booleano, solo no olvides implementarlo al final de este archivo
         return not self._is_truthy(right)
+        
+    # Lo mismo aplica para incrementos y decrementos...
     elif operator in ("++", "--"):
         if not isinstance(expression.right, ExprVariable):
             raise RuntimeError(expression.operator, "El operador de incremento/decremento solo puede aplicarse a variables.")
 
+        # Aquí, podrias aprovechar que ya tienes la función visit_variable_expression para evitar repetir código...
         # Obtener nombre de variable y valor actual
         var_name = expression.right.name
         current_value = self.environment.get(var_name)
@@ -86,24 +97,30 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
         return new_value if expression.is_prefix else current_value
     else:
         raise RuntimeError(expression.operator, f"Operador unario desconocido: {operator}")
-        
-        
      """
     
-
-"""
-
+    """
     def visit_binary_expression(self, expression: ExprBinary) -> Any:
+        # Lo mismo que en visit_unary_expression...
         left = self._evaluate(expression.left)
         right = self._evaluate(expression.right)
-        operator = expression.operator.lexema
+        operator = expression.operator.tipo
 
-        if operator == "+":
-            return left + right
+        if operator == "PLUS":
+            # Antes de evaluar la expresión, verifica que sea un valor entero o flotante (y solo para este caso, puede ser también una string)
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                return left + right
+            if isinstance(left, str) and isinstance(right, str):
+                return left + right
+            raise RuntimeError(expression.operator, "Operands must be two numbers or two strings")
+        # Lo mismo para las validaciones del resto de simbolos...
+        # Procura dejar un espacio entre elif's
         elif operator == "-":
             return left - right
+            
         elif operator == "*":
             return left * right
+            
         elif operator == "/":
             if right == 0:
                 raise RuntimeError(expression.operator, "División entre cero.")
@@ -122,9 +139,7 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
             return left != right
         else:
             raise RuntimeError(expression.operator, f"Operador desconocido: {operator}")
-
     """
-        
     
     def visit_variable_expression(self, expression: ExprVariable) -> Any:
         return self.environment.get(expression.name)
@@ -135,17 +150,17 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
         return value
     
     """
-    
+    # Elimine una delcaración de función que tenias repetida
     def visit_arithmetic_expression(self, expression: ExprArithmetic) -> Any:
-        def visit_arithmetic_expression(self, expression: ExprArithmetic) -> Any:
         left = self._evaluate(expression.left)
         right = self._evaluate(expression.right)
+        # Lo mismo con los operadores que en la del visit_unary_expression
+        operator = expression.operator.tipo
 
-        operator = expression.operator.lexema
-
-        if operator == "+":
+        # No olvides implementar un método para verificar antes de retornar el resultado que sean de tipo entero flotantes o string según corresponda.
+        if operator == "PLUS":
             return left + right
-        elif operator == "-":
+        elif operator == "MINUS":
             return left - right
         elif operator == "*":
             return left * right
@@ -153,28 +168,26 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
             if right == 0:
                 raise RuntimeError(expression.operator, "Division entre cero.")
             return left / right
-        elif operator == "%":
-            return left % right
-        elif operator == "**":
-            return left ** right
         else:
             raise RuntimeError(expression.operator, f"operador desconocido '{operator}'")
-"""
+    """
     
     """
+    # Lo mismo que en las anteriores sugerencias
     def visit_logical_expression(self, expression: ExprLogical) -> Any:
         left = self._evaluate(expression.left)
 
-        if expression.operator.lexema == "or":
+        if expression.operator.tipo == "OR":
+            # No olvides impelemntar el método _is_truthy
             if self._is_truthy(left):
                 return left
-        else:  
+        # En lugar del else, te sugiero cambiar por else if. Así, aseguramos que forzosamente debe matchear con AND o OR, y en caso de no hacerlo lanzar la excepción 
+        elif expression.operator.tipo == "AND"
             if not self._is_truthy(left):
                 return left
-
-        return self._evaluate(expression.right)
-
-        """
+            return self._evaluate(expression.right)
+        raise RuntimeError(expression.operator, f"Unknown logical operator: {operator_type}")
+    """
         
     def visit_call_expression(self, expression: ExprCallFunction) -> Any:
         pass
