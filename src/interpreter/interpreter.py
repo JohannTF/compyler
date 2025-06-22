@@ -86,32 +86,31 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
     def visit_grouping_expression(self, expression: ExprGrouping) -> Any:
         return self._evaluate(expression.expression)
     
-    """
+    #De aqui
     
     def visit_unary_expression(self, expression: ExprUnary) -> Any:
-        operator = expression.operator.lexema
+        operator = expression.operator.tipo
         right = self._evaluate(expression.right)
 
-        if operator == "-":
-            return -right
-        elif operator == "!":
+        if operator == "MINUS":
+            if isinstance(right, (int,float)):
+                return -right
+            else:
+                raise RuntimeError(expression.operator, "Operand must be a number")
+       
+        elif operator == "BANG":
             return not self._is_truthy(right)
-        elif operator in ("++", "--"):
+       
+        elif operator in ("INCREMENT", "DECREMENT"):
             if not isinstance(expression.right, ExprVariable):
                 raise RuntimeError(expression.operator, "El operador de incremento/decremento solo puede aplicarse a variables.")
-
-            # Obtener nombre de variable y valor actual
-            var_name = expression.right.name
-            current_value = self.environment.get(var_name)
+            current_value = self.visit_variable_expression(expression.right)
 
             if not isinstance(current_value, (int, float)):
                 raise RuntimeError(expression.operator, "El operador de incremento/decremento solo funciona con números.")
-
             new_value = current_value + 1 if operator == "++" else current_value - 1
             self.environment.assign(var_name, new_value)
 
-            # Si es prefijo: retornar el nuevo valor
-            # Si es postfijo: retornar el valor original
             return new_value if expression.is_prefix else current_value
         else:
             raise RuntimeError(expression.operator, f"Operador unario desconocido: {operator}")
@@ -119,69 +118,81 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
     def visit_binary_expression(self, expression: ExprBinary) -> Any:
         left = self._evaluate(expression.left)
         right = self._evaluate(expression.right)
-        operator = expression.operator.lexema
+        operator = expression.operator.tipo
 
-        if operator == "+":
-            return left + right
-        elif operator == "-":
-            return left - right
-        elif operator == "*":
-            return left * right
-        elif operator == "/":
-            if right == 0:
-                raise RuntimeError(expression.operator, "División entre cero.")
+        if operator == "PLUS":
+            if isinstance(left, (int,float)) and isinstance(right, (int,float)):
+                return left + right
+            if isinstance(left, (int,str)) and isinstance(right, (int,str)):
+                return left + right
+        
+        elif operator == "MINUS":
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                return left - right
+        
+        elif operator == "STAR":
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                return left * right
+        
+        elif operator == "SLASH":
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                if right == 0:
+                    raise RuntimeError(expression.operator, "División entre cero.")
             return left / right
-        elif operator == ">":
-            return left > right
-        elif operator == ">=":
-            return left >= right
-        elif operator == "<":
-            return left < right
-        elif operator == "<=":
-            return left <= right
-        elif operator == "==":
+       
+        elif operator == "GREATER":
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                return left > right
+        
+        elif operator == "GREATER_EQUAL":
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                return left >= right
+        
+        elif operator == "LESS":
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                return left < right
+        
+        elif operator == "LESS_EQUAL":
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                return left <= right
+        
+        elif operator == "EQUAL_EQUAL":
             return left == right
-        elif operator == "!=":
+        
+        elif operator == "BANG_EQUAL":
             return left != right
         else:
             raise RuntimeError(expression.operator, f"Operador desconocido: {operator}")
 
-    # def visit_arithmetic_expression(self, expression: ExprArithmetic) -> Any:
     def visit_arithmetic_expression(self, expression: ExprArithmetic) -> Any:
         left = self._evaluate(expression.left)
         right = self._evaluate(expression.right)
 
-        operator = expression.operator.lexema
+        operator = expression.operator.tipo
 
-        if operator == "+":
-            return left + right
-        elif operator == "-":
-            return left - right
-        elif operator == "*":
-            return left * right
-        elif operator == "/":
-            if right == 0:
-                raise RuntimeError(expression.operator, "Division entre cero.")
+        if operator == "PLUS":
+            if isinstance(left, (int,float)) and isinstance(right, (int,float)):
+                return left + right
+            if isinstance(left, (int,str)) and isinstance(right, (int,str)):
+                return left + right
+        
+        elif operator == "MINUS":
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                return left - right
+       
+        elif operator == "STAR":
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                return left * right
+       
+        elif operator == "SLASH":
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                if right == 0:
+                    raise RuntimeError(expression.operator, "Division entre cero.")
             return left / right
-        elif operator == "%":
-            return left % right
-        elif operator == "**":
-            return left ** right
         else:
             raise RuntimeError(expression.operator, f"operador desconocido '{operator}'")
-    
-    def visit_logical_expression(self, expression: ExprLogical) -> Any:
-        left = self._evaluate(expression.left)
-
-        if expression.operator.lexema == "or":
-            if self._is_truthy(left):
-                return left
-        else:  
-            if not self._is_truthy(left):
-                return left
-
-        return self._evaluate(expression.right)
-    
+        
+            
     def visit_variable_expression(self, expression: ExprVariable) -> Any:
         return self.environment.get(expression.name)
     
@@ -190,11 +201,23 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
         self.environment.assign(expression.name, value)
         return value
     
+    def visit_logical_expression(self, expression: ExprLogical) -> Any:
+        left = self._evaluate(expression.left)
+
+        if expression.operator.tipo == "OR":
+            if self._is_truthy(left):
+                return left
+        elif expression.operator.tipo == "AND":  
+            if not self._is_truthy(left):
+                return left
+            return self._evaluate(expression.right)
+        raise RuntimeError(expression.operator, f"Unknow logical operator: {operator_type}")    
     
     def visit_call_expression(self, expression: ExprCallFunction) -> Any:
         pass
         
-    """
+    #Hasta aqui
+
     # STATEMENTS
     
     def visit_expression_statement(self, statement: StmtExpression) -> None:
@@ -275,4 +298,15 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
                 text = text[:-2]
             return text
         return str(obj)
+    
+
+    """"
+    #  Metodo is_truthy
+    def _is_truthy(self, value: Any) -> bool:
+        if value is None:
+            return False
+        if isinstance(value, bool):
+            return value
+        return True
+    """
     
