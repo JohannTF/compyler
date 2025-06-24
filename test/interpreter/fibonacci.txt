@@ -1,0 +1,41 @@
+// Fibonacci recursivo
+fun fibonacci(n) {
+    if (n <= 1) {
+        return n;
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+// Fibonacci iterativo (más eficiente)
+fun fibonacciIterativo(n) {
+    if (n <= 1) {
+        return n;
+    }
+    
+    var a = 0;
+    var b = 1;
+    var i = 2;
+    
+    while (i <= n) {
+        var temp = a + b;
+        a = b;
+        b = temp;
+        i = i + 1;
+    }
+    
+    return b;
+}
+
+// Pruebas
+print("Fibonacci recursivo de 10:");
+print(fibonacci(10));
+
+print("Fibonacci iterativo de 10:");
+print(fibonacciIterativo(10));
+
+print("Comparación hasta 15:");
+var num = 0;
+while (num <= 15) {
+    print("fib(" + num + ") = " + fibonacciIterativo(num));
+    num = num + 1;
+}

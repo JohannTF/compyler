@@ -1,0 +1,17 @@
+// Pruebas de concatenación mejoradas
+print("=== Pruebas de Concatenación ===");
+
+var nombre = "Juan";
+var edad = 25;
+var salario = 1500.50;
+
+// String + número
+print("Mi nombre es " + nombre);
+print("Tengo " + edad + " años");
+print("Mi salario es $" + salario);
+
+// Número + string
+print(edad + " es mi edad");
+
+// Concatenación múltiple
+print("Hola " + nombre + ", tienes " + edad + " años y ganas $" + salario);

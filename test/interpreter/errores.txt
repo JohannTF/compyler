@@ -1,0 +1,18 @@
+// Prueba múltiples errores
+var a = 5;
+var b = "texto";
+
+// Línea 5: Error de concatenación inválida (esto ya no debería dar error)
+var c = a + b;
+
+// Línea 8: Error de operación aritmética inválida  
+var d = a * b;
+
+// Error: división por cero
+var x = 5 / 0;
+
+// Error: operando inválido
+var y = -"texto";
+
+// Error: variable no definida
+print(variable_inexistente);

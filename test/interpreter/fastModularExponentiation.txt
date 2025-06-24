@@ -1,0 +1,26 @@
+// Función auxiliar para calcular módulo
+fun mod(a, b) {
+    return a - (a / b) * b;
+}
+
+// Exponenciación modular simple
+fun modPower(base, exp, modulus) {
+    var result = 1;
+    base = mod(base, modulus);
+    
+    while (exp > 0) {
+        if (mod(exp, 2) == 1) {
+            result = mod(result * base, modulus);
+        }
+        exp = exp / 2;
+        base = mod(base * base, modulus);
+    }
+    
+    return result;
+}
+
+// Pruebas
+print("=== Exponenciación ===");
+print("Exponenciación modular:");
+var id = modPower(2, 8, 7);
+print("(2^8) mod 7 = " + id);
