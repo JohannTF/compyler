@@ -35,7 +35,6 @@ class Parser:
         try:
             ast = self.program()
             if self.preanalisis is None or self.preanalisis.tipo == "EOF":
-                print("Programa válido")
                 return ast
             else:
                 self.error(["EOF"])
@@ -46,7 +45,7 @@ class Parser:
             
     def error(self, expected):
         expected_str = " o ".join(expected)
-        raise SyntaxError(f"Error sintáctico en la línea {self.preanalisis.linea}. Se esperaba {expected_str} pero se recibió {self.preanalisis.tipo}")
+        raise SyntaxError(f"Syntax error at line {self.preanalisis.linea}. Expected {expected_str} but got {self.preanalisis.tipo}")
 
     def coincidir(self, token_type):
         if self.preanalisis.tipo == token_type:

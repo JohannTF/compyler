@@ -3,18 +3,18 @@ Módulo que implementa el REPL (Read-Eval-Print Loop) para interacción interact
 """
 from src.lexer.scanner import Scanner
 from src.parser.parser import Parser
+from src.interpreter.interpreter import Interpreter
 
 
 def start_repl():
     """
     Inicia un REPL para interactuar con el intérprete.
-    
-    Args:
-        version (str): Versión del intérprete a mostrar
     """
     print("Compilador")
     print("Escribe 'exit;', 'quit;', 'out;', 'bye;' o '0;' para salir")
     print()
+    
+    interpreter = Interpreter()
     
     while True:
         try:
@@ -28,18 +28,18 @@ def start_repl():
             scanner = Scanner(code)
             scanner.escanear_tokens()
             tokens = scanner.tokens
-                
-            # Verificar que se hayan leído tokens
-            if not tokens:
-                print("No se encontraron tokens para analizar")
-                return
                     
-            # Crear el parser y analizar la lista de tokens
+            # Parser
             try:
                 parser = Parser(tokens)
-                parser.parse()
+                ast = parser.parse()
+                
+                # Interpretar el AST resultante
+                if ast:
+                    interpreter.interpret(ast) 
+
             except Exception as e:
-                print(f"Error inesperado: {e}")
+                print(f"Error: {e}")
             
         except EOFError:
             print()
@@ -47,4 +47,4 @@ def start_repl():
         except KeyboardInterrupt:
             print("\nOperación cancelada")
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error inesperado: {e}")

@@ -44,9 +44,9 @@ class Function:
         # Vincular parámetros con argumentos
         for i, param in enumerate(self.declaration.params):
             if i < len(arguments):
-                environment.define(param.lexeme, arguments[i])
+                environment.define(param.lexema, arguments[i])
             else:
-                environment.define(param.lexeme, None)
+                environment.define(param.lexema, None)
         
         try:
             # Ejecutar el cuerpo de la función
@@ -58,7 +58,6 @@ class Function:
         return None
 
 class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
-    
     def __init__(self):
         self.globals = Environment()
         self.environment = self.globals
@@ -68,9 +67,12 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
             for statement in statements:
                 self._execute(statement)
         except RuntimeError as error:
-            print(f"Runtime Error: {error.message}")
-            if hasattr(error.token, 'linea'):
-                print(f"Línea: {error.token.linea}")
+            line_info = ""
+            if hasattr(error, 'token') and hasattr(error.token, 'linea'):
+                line_info = f" At line {error.token.linea}"
+            print(f"Runtime Error: {error.message}{line_info}")
+        except Exception as e:
+            print(f"Unexpected error in interpreter: {e}")
     
     def _evaluate(self, expression: Expression) -> Any:
         return expression.accept(self)
@@ -86,14 +88,12 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
     def visit_grouping_expression(self, expression: ExprGrouping) -> Any:
         return self._evaluate(expression.expression)
     
-    #De aqui
-    
     def visit_unary_expression(self, expression: ExprUnary) -> Any:
         operator = expression.operator.tipo
         right = self._evaluate(expression.right)
 
         if operator == "MINUS":
-            if isinstance(right, (int,float)):
+            if isinstance(right, (int, float)):
                 return -right
             else:
                 raise RuntimeError(expression.operator, "Operand must be a number")
@@ -103,58 +103,81 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
        
         elif operator in ("INCREMENT", "DECREMENT"):
             if not isinstance(expression.right, ExprVariable):
-                raise RuntimeError(expression.operator, "El operador de incremento/decremento solo puede aplicarse a variables.")
+                raise RuntimeError(expression.operator, "Increment/decrement operator can only be applied to variables.")
+            
+            var_name = expression.right.name
             current_value = self.visit_variable_expression(expression.right)
 
             if not isinstance(current_value, (int, float)):
-                raise RuntimeError(expression.operator, "El operador de incremento/decremento solo funciona con números.")
-            new_value = current_value + 1 if operator == "++" else current_value - 1
+                raise RuntimeError(expression.operator, "Increment/decrement operator only works with numbers.")
+            
+            new_value = current_value + 1 if operator == "INCREMENT" else current_value - 1
             self.environment.assign(var_name, new_value)
 
-            return new_value if expression.is_prefix else current_value
+            return new_value
         else:
-            raise RuntimeError(expression.operator, f"Operador unario desconocido: {operator}")
+            raise RuntimeError(expression.operator, f"Unknown unary operator: {operator}")
 
     def visit_binary_expression(self, expression: ExprBinary) -> Any:
         left = self._evaluate(expression.left)
         right = self._evaluate(expression.right)
         operator = expression.operator.tipo
-
+        
         if operator == "PLUS":
-            if isinstance(left, (int,float)) and isinstance(right, (int,float)):
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
                 return left + right
-            if isinstance(left, (int,str)) and isinstance(right, (int,str)):
+            elif isinstance(left, str) and isinstance(right, str):
                 return left + right
+            elif isinstance(left, str) and isinstance(right, (int, float)):
+                return left + self._stringify(right)
+            elif isinstance(left, (int, float)) and isinstance(right, str):
+                return self._stringify(left) + right
+            else:
+                raise RuntimeError(expression.operator, "Operands must be two numbers or two strings.")
         
         elif operator == "MINUS":
             if isinstance(left, (int, float)) and isinstance(right, (int, float)):
                 return left - right
+            else:
+                raise RuntimeError(expression.operator, "Operands must be numbers.")
         
         elif operator == "STAR":
             if isinstance(left, (int, float)) and isinstance(right, (int, float)):
                 return left * right
+            else:
+                raise RuntimeError(expression.operator, "Operands must be numbers.")
         
         elif operator == "SLASH":
             if isinstance(left, (int, float)) and isinstance(right, (int, float)):
                 if right == 0:
-                    raise RuntimeError(expression.operator, "División entre cero.")
-            return left / right
+                    raise RuntimeError(expression.operator, "Division by zero.")
+                return left / right
+            else:
+                raise RuntimeError(expression.operator, "Operands must be numbers.")
        
         elif operator == "GREATER":
             if isinstance(left, (int, float)) and isinstance(right, (int, float)):
                 return left > right
+            else:
+                raise RuntimeError(expression.operator, "Operands must be numbers.")
         
         elif operator == "GREATER_EQUAL":
             if isinstance(left, (int, float)) and isinstance(right, (int, float)):
                 return left >= right
+            else:
+                raise RuntimeError(expression.operator, "Operands must be numbers.")
         
         elif operator == "LESS":
             if isinstance(left, (int, float)) and isinstance(right, (int, float)):
                 return left < right
+            else:
+                raise RuntimeError(expression.operator, "Operands must be numbers.")
         
         elif operator == "LESS_EQUAL":
             if isinstance(left, (int, float)) and isinstance(right, (int, float)):
                 return left <= right
+            else:
+                raise RuntimeError(expression.operator, "Operands must be numbers.")
         
         elif operator == "EQUAL_EQUAL":
             return left == right
@@ -162,7 +185,7 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
         elif operator == "BANG_EQUAL":
             return left != right
         else:
-            raise RuntimeError(expression.operator, f"Operador desconocido: {operator}")
+            raise RuntimeError(expression.operator, f"Unknown operator: {operator}")
 
     def visit_arithmetic_expression(self, expression: ExprArithmetic) -> Any:
         left = self._evaluate(expression.left)
@@ -171,27 +194,38 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
         operator = expression.operator.tipo
 
         if operator == "PLUS":
-            if isinstance(left, (int,float)) and isinstance(right, (int,float)):
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
                 return left + right
-            if isinstance(left, (int,str)) and isinstance(right, (int,str)):
+            elif isinstance(left, str) and isinstance(right, str):
                 return left + right
+            elif isinstance(left, str) and isinstance(right, (int, float)):
+                return left + self._stringify(right)
+            elif isinstance(left, (int, float)) and isinstance(right, str):
+                return self._stringify(left) + right
+            else:
+                raise RuntimeError(expression.operator, "Operands must be two numbers or two strings.")
         
         elif operator == "MINUS":
             if isinstance(left, (int, float)) and isinstance(right, (int, float)):
                 return left - right
+            else:
+                raise RuntimeError(expression.operator, "Operands must be numbers.")
        
         elif operator == "STAR":
             if isinstance(left, (int, float)) and isinstance(right, (int, float)):
                 return left * right
-       
+            else:
+                raise RuntimeError(expression.operator, "Operands must be numbers.")
+        
         elif operator == "SLASH":
             if isinstance(left, (int, float)) and isinstance(right, (int, float)):
                 if right == 0:
-                    raise RuntimeError(expression.operator, "Division entre cero.")
-            return left / right
+                    raise RuntimeError(expression.operator, "Division by zero.")
+                return left / right
+            else:
+                raise RuntimeError(expression.operator, "Operands must be numbers.")
         else:
-            raise RuntimeError(expression.operator, f"operador desconocido '{operator}'")
-        
+            raise RuntimeError(expression.operator, f"Unknown operator '{operator}'")
             
     def visit_variable_expression(self, expression: ExprVariable) -> Any:
         return self.environment.get(expression.name)
@@ -207,16 +241,31 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
         if expression.operator.tipo == "OR":
             if self._is_truthy(left):
                 return left
+            else:
+                return self._evaluate(expression.right)
         elif expression.operator.tipo == "AND":  
             if not self._is_truthy(left):
                 return left
-            return self._evaluate(expression.right)
-        raise RuntimeError(expression.operator, f"Unknow logical operator: {operator_type}")    
+            else:
+                return self._evaluate(expression.right)
+        else:
+            raise RuntimeError(expression.operator, f"Unknown logical operator: {expression.operator.tipo}")
     
     def visit_call_expression(self, expression: ExprCallFunction) -> Any:
-        pass
+        callee = self._evaluate(expression.callee)
         
-    #Hasta aqui
+        arguments = []
+        for argument in expression.arguments:
+            arguments.append(self._evaluate(argument))
+        
+        if not isinstance(callee, Function):
+            raise RuntimeError(expression.paren, "Can only call functions and classes.")
+        
+        function = callee
+        if len(arguments) != len(function.declaration.params):
+            raise RuntimeError(expression.paren, f"Expected {len(function.declaration.params)} arguments but got {len(arguments)}.")
+        
+        return function.call(self, arguments)
 
     # STATEMENTS
     
@@ -243,9 +292,9 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
     def visit_if_statement(self, statement: StmtIf) -> None:
         condition = self._evaluate(statement.condition)
         if self._is_truthy(condition):
-            self._execute(statement.then_branch)
-        elif statement.else_branch is not None:
-            self._execute(statement.else_branch)
+            self._execute(statement.thenBranch)
+        elif statement.elseBranch is not None:
+            self._execute(statement.elseBranch)
         return None
     
     def visit_loop_statement(self, statement: StmtLoop) -> None:
@@ -255,6 +304,7 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
                     self._execute(stmt)
             else:
                 self._execute(statement.body)
+        return None
     
     def visit_function_statement(self, statement: StmtFunction) -> None:
         function = Function(statement, self.environment)
@@ -285,6 +335,10 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
             return False
         if isinstance(obj, bool):
             return obj
+        if isinstance(obj, str):
+            return len(obj) > 0
+        if isinstance(obj, (int, float)):
+            return obj != 0
         return True
 
     def _stringify(self, obj: Any) -> str:
@@ -292,21 +346,11 @@ class Interpreter(VisitorExpression[Any], VisitorStatement[None]):
             return "null"
         if isinstance(obj, bool):
             return "true" if obj else "false"
+        if isinstance(obj, str):
+            return f'{obj}'
         if isinstance(obj, float):
             text = str(obj)
             if text.endswith(".0"):
                 text = text[:-2]
             return text
         return str(obj)
-    
-
-    """"
-    #  Metodo is_truthy
-    def _is_truthy(self, value: Any) -> bool:
-        if value is None:
-            return False
-        if isinstance(value, bool):
-            return value
-        return True
-    """
-    
